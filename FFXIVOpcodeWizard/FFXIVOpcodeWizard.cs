@@ -18,12 +18,12 @@ namespace FFXIVOpcodeWizard
         {
             // Network monitor type
             TCPNetworkMonitor.NetworkMonitorType MonitorType = TCPNetworkMonitor.NetworkMonitorType.RawSocket;
-            StringBuilder errbuff = new StringBuilder();
+            /*StringBuilder errbuff = new StringBuilder();
             pcap_open("", 0, 0, 0, new IntPtr(), errbuff);
             if (errbuff.ToString() != "")
             {
                 MonitorType = TCPNetworkMonitor.NetworkMonitorType.WinPCap;
-            }
+            }*/
 
             // Packet queue
             pq = new PacketQueue();
