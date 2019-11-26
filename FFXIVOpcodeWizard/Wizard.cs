@@ -23,12 +23,6 @@ namespace FFXIVOpcodeWizard
             ushort playerSetup = PacketProcessors.ScanPlayerSetup(pq, playerName);
             Console.WriteLine("PlayerSetup found at opcode 0x{0}!", playerSetup.ToString("X4"));
             output.Append("PlayerSetup: 0x").Append(playerSetup.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
-            
-            // Playtime
-            Console.WriteLine("Scanning for Playtime. Please type /playtime...");
-            ushort playtime = PacketProcessors.ScanPlaytime(pq);
-            Console.WriteLine("Playtime found at opcode 0x{0}!", playtime.ToString("X4"));
-            output.Append("Playtime: 0x").Append(playtime.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
             // ActorControl, ClientTrigger
             Console.WriteLine("Scanning for ActorControl, ClientTrigger. Please draw your weapon...");
@@ -40,6 +34,12 @@ namespace FFXIVOpcodeWizard
             ushort actorControl = PacketProcessors.ScanActorControl(pq);
             Console.WriteLine("ActorControl found at opcode 0x{0}!", actorControl.ToString("X4"));
             output.Append("ActorControl: 0x").Append(actorControl.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            // Playtime
+            Console.WriteLine("Scanning for Playtime. Please type /playtime...");
+            ushort playtime = PacketProcessors.ScanPlaytime(pq);
+            Console.WriteLine("Playtime found at opcode 0x{0}!", playtime.ToString("X4"));
+            output.Append("Playtime: 0x").Append(playtime.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
             // MarketBoardSearchResult
             Console.WriteLine("Scanning for MarketBoardSearchResult. Please click \"Catalysts\" on the market board.");
