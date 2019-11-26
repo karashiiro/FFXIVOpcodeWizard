@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="FFXIVOpcodeWizard.cs" />
     <Compile Include="Packet.cs" />
+    <Compile Include="PacketProcessors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sapphire\Common.cs" />
     <Compile Include="Wizard.cs" />
