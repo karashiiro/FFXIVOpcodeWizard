@@ -44,8 +44,8 @@ namespace FFXIVOpcodeWizard
             // MarketBoardSearchResult
             Console.WriteLine("Scanning for MarketBoardSearchResult. Please click \"Catalysts\" on the market board.");
             ushort marketBoardSearchResult = PacketProcessors.ScanMarketBoardSearchResult(pq);
-            Console.WriteLine("MarketBoardItemListingCount found at opcode 0x{0}!", marketBoardSearchResult.ToString("X4"));
-            output.Append("MarketBoardItemListingCount: 0x").Append(marketBoardSearchResult.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+            Console.WriteLine("MarketBoardSearchResult found at opcode 0x{0}!", marketBoardSearchResult.ToString("X4"));
+            output.Append("MarketBoardSearchResult: 0x").Append(marketBoardSearchResult.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
             // MarketBoardItemListingCount, MarketBoardItemListing, MarketBoardItemListingHistory
             Console.WriteLine("Scanning for MarketBoardItemListingCount, MarketBoardItemListing, MarketBoardItemListingHistory. Please open the market board listings for Grade 7 Dark Matter...");
