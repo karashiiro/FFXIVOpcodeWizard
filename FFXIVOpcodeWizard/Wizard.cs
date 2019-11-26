@@ -1,5 +1,6 @@
 ﻿using Sapphire.Common.Network;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +10,7 @@ namespace FFXIVOpcodeWizard
 {
     static class Wizard
     {
-        public static void Run(PacketQueue pq)
+        public static void Run(LinkedList<Packet> pq)
         {
             StringBuilder output = new StringBuilder();
             
@@ -105,14 +106,15 @@ namespace FFXIVOpcodeWizard
          * From here down are our helper methods to ID packets.
          */
 
-        private static MetaPacket ScanGeneric(PacketQueue pq)
+        private static MetaPacket ScanGeneric(LinkedList<Packet> pq)
         {
-            while (pq.Peek() == null)
+            while (pq.First == null)
             {
                 Thread.Sleep(2);
             }
 
-            Packet basePacket = pq.Pop();
+            Packet basePacket = pq.First();
+            pq.RemoveFirst();
             MetaPacket mp = new MetaPacket(basePacket)
             {
                 PacketSize = BitConverter.ToUInt32(basePacket.Data, (int)Offsets.PacketSize),
@@ -122,7 +124,7 @@ namespace FFXIVOpcodeWizard
             return mp;
         }
 
-        private static ushort ScanPlaytime(PacketQueue pq)
+        private static ushort ScanPlaytime(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -138,7 +140,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanActorControl(PacketQueue pq)
+        private static ushort ScanActorControl(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -154,7 +156,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanMarketBoardItemListingCount(PacketQueue pq)
+        private static ushort ScanMarketBoardItemListingCount(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -170,7 +172,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanMarketBoardItemListing(PacketQueue pq)
+        private static ushort ScanMarketBoardItemListing(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -186,7 +188,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanMarketBoardItemListingHistory(PacketQueue pq)
+        private static ushort ScanMarketBoardItemListingHistory(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -202,7 +204,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanMarketBoardSearchResult(PacketQueue pq)
+        private static ushort ScanMarketBoardSearchResult(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -218,7 +220,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanNpcSpawn(PacketQueue pq, string npcName)
+        private static ushort ScanNpcSpawn(LinkedList<Packet> pq, string npcName)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -234,7 +236,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanItemInfo(PacketQueue pq)
+        private static ushort ScanItemInfo(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -250,7 +252,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanPlayerSpawn(PacketQueue pq, ushort worldID)
+        private static ushort ScanPlayerSpawn(LinkedList<Packet> pq, ushort worldID)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -266,7 +268,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanPlayerSetup(PacketQueue pq, string playerName)
+        private static ushort ScanPlayerSetup(LinkedList<Packet> pq, string playerName)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -282,7 +284,7 @@ namespace FFXIVOpcodeWizard
             return foundPacket.Opcode;
         }
 
-        private static ushort ScanUpdateClassInfo(PacketQueue pq, ushort level)
+        private static ushort ScanUpdateClassInfo(LinkedList<Packet> pq, ushort level)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||
@@ -299,7 +301,7 @@ namespace FFXIVOpcodeWizard
         }
 
 
-        private static ushort ScanClientTrigger(PacketQueue pq)
+        private static ushort ScanClientTrigger(LinkedList<Packet> pq)
         {
             MetaPacket foundPacket = null;
             while (foundPacket == null ||

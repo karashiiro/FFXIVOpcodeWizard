@@ -1,9 +1,9 @@
 ﻿using Machina;
 using Machina.FFXIV;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace FFXIVOpcodeWizard
 {
@@ -12,7 +12,7 @@ namespace FFXIVOpcodeWizard
         [DllImport("wpcap.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern IntPtr pcap_open(string source, int snaplen, int flags, int read_timeout, IntPtr auth, StringBuilder errbuff);
 
-        static PacketQueue pq;
+        static LinkedList<Packet> pq;
 
         static void Main(string[] args)
         {
@@ -26,7 +26,7 @@ namespace FFXIVOpcodeWizard
             }*/
 
             // Packet queue
-            pq = new PacketQueue();
+            pq = new LinkedList<Packet>();
 
             // Initialize Machina
             FFXIVNetworkMonitor monitor = new FFXIVNetworkMonitor
@@ -53,7 +53,7 @@ namespace FFXIVOpcodeWizard
 
         static void OnMessage(string connection, long epoch, byte[] data, string direction)
         {
-            pq.Push(new Packet(connection, epoch, data, direction));
+            pq.AddLast(new Packet(connection, epoch, data, direction));
         }
     }
 }
