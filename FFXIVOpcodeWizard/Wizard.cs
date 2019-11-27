@@ -92,6 +92,14 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("UpdateClassInfo found at opcode 0x{0}!", updateClassInfo.ToString("X4"));
             output.Append("UpdateClassInfo: 0x").Append(updateClassInfo.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
+            // InitZone
+            Console.WriteLine("Scanning for InitZone. Please enter the TerritoryID of the zone you will teleport to.");
+            ushort zoneID = ushort.Parse(Console.ReadLine());
+            Console.WriteLine("Please teleport to that zone...");
+            ushort initZone = PacketProcessors.ScanInitZone(pq, zoneID);
+            Console.WriteLine("InitZone found at opcode 0x{0}!", initZone.ToString("X4"));
+            output.Append("InitZone: 0x").Append(initZone.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // Done
             Console.WriteLine("All packets found!\n\n");
             Console.WriteLine(output.ToString());
