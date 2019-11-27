@@ -136,5 +136,10 @@ namespace FFXIVOpcodeWizard
         {
             return ScanOutbound(pq, (packet) => packet.PacketSize == 64 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData) == 1);
         }
+
+        public static ushort ScanInitZone(LinkedList<Packet> pq, ushort zoneID)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 128 &&  BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 2) == zoneID);
+        }
     }
 }
