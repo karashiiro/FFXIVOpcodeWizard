@@ -166,5 +166,10 @@ namespace FFXIVOpcodeWizard
         {
             return ScanInbound(pq, (packet) => packet.PacketSize == 56 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
         }
+
+        public static ushort ScanUseMooch(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 80 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x18) == 2587);
+        }
     }
 }

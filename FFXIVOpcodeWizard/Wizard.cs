@@ -126,6 +126,13 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("EventUnk0 found at opcode 0x{0}!", eventUnk0.ToString("X4"));
             output.Append("EventUnk0: 0x").Append(eventUnk0.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
+            // UseMooch
+            Console.WriteLine("Scanning for UseMooch");
+            Console.WriteLine("Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.");
+            ushort useMooch = PacketProcessors.ScanUseMooch(pq);
+            Console.WriteLine("UseMooch found at opcode 0x{0}!", useMooch.ToString("X4"));
+            output.Append("UseMooch: 0x").Append(useMooch.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // Done
             Console.WriteLine("All packets found!\n\n");
             Console.WriteLine(output.ToString());
