@@ -141,5 +141,35 @@ namespace FFXIVOpcodeWizard
         {
             return ScanInbound(pq, (packet) => packet.PacketSize == 128 &&  BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 2) == zoneID);
         }
+
+        public static ushort ScanEventPlay(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 72 && BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 8) == 0x150001 );
+        }
+
+        public static ushort ScanEventStart(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 56 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 8) == 0x150001);
+        }
+
+        public static ushort ScanEventFinish(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData) == 0x150001 && packet.Data[(int)Offsets.IpcData + 4] == 0x14 && packet.Data[(int)Offsets.IpcData + 5] == 0x01);
+        }
+
+        public static ushort ScanEventUnk0(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 80 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x1C) == 284);
+        }
+
+        public static ushort ScanEventUnk1(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 56 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
+        }
+
+        public static ushort ScanUseMooch(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 80 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x18) == 2587);
+        }
     }
 }

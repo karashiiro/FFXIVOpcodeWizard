@@ -100,6 +100,39 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("InitZone found at opcode 0x{0}!", initZone.ToString("X4"));
             output.Append("InitZone: 0x").Append(initZone.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
+            // EventStart
+            Console.WriteLine("Scanning for EventStart, EventPlay and EventFinish.");
+            Console.WriteLine("Please begin fishing and put your rod away immediately.");
+            ushort eventStart = PacketProcessors.ScanEventStart(pq);
+            Console.WriteLine("EventStart found at opcode 0x{0}!", eventStart.ToString("X4"));
+            output.Append("EventStart: 0x").Append(eventStart.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            // EventPlay
+            ushort eventPlay = PacketProcessors.ScanEventPlay(pq);
+            Console.WriteLine("EventPlay found at opcode 0x{0}!", eventPlay.ToString("X4"));
+            output.Append("EventPlay: 0x").Append(eventPlay.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            // EventFinish
+            ushort eventFinish = PacketProcessors.ScanEventFinish(pq);
+            Console.WriteLine("EventFinish found at opcode 0x{0}!", eventFinish.ToString("X4"));
+            output.Append("EventFinish: 0x").Append(eventFinish.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            // EventUnk0 & EventUnk1
+            Console.WriteLine("Scanning for EventUnk0 and EventUnk1. Please cast your line and catch a fish.");
+            ushort eventUnk1 = PacketProcessors.ScanEventUnk1(pq);
+            Console.WriteLine("EventUnk1 found at opcode 0x{0}!", eventUnk1.ToString("X4"));
+            output.Append("EventUnk1: 0x").Append(eventUnk1.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+            ushort eventUnk0 = PacketProcessors.ScanEventUnk0(pq);
+            Console.WriteLine("EventUnk0 found at opcode 0x{0}!", eventUnk0.ToString("X4"));
+            output.Append("EventUnk0: 0x").Append(eventUnk0.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            // UseMooch
+            Console.WriteLine("Scanning for UseMooch");
+            Console.WriteLine("Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.");
+            ushort useMooch = PacketProcessors.ScanUseMooch(pq);
+            Console.WriteLine("UseMooch found at opcode 0x{0}!", useMooch.ToString("X4"));
+            output.Append("UseMooch: 0x").Append(useMooch.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // Done
             Console.WriteLine("All packets found!\n\n");
             Console.WriteLine(output.ToString());
