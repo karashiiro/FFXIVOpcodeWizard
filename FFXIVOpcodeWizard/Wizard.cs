@@ -100,6 +100,12 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("InitZone found at opcode 0x{0}!", initZone.ToString("X4"));
             output.Append("InitZone: 0x").Append(initZone.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
+            // EventPlay
+            Console.WriteLine("Scanning for EventPlay. Please start fishing.");
+            ushort eventPlay = PacketProcessors.ScanEventPlay(pq);
+            Console.WriteLine("EventPlay found at opcode 0x{0}!", eventPlay.ToString("X4"));
+            output.Append("EventPlay: 0x").Append(eventPlay.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // Done
             Console.WriteLine("All packets found!\n\n");
             Console.WriteLine(output.ToString());
