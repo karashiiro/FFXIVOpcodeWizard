@@ -156,5 +156,15 @@ namespace FFXIVOpcodeWizard
         {
             return ScanInbound(pq, (packet) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData) == 0x150001 && packet.Data[(int)Offsets.IpcData + 4] == 0x14 && packet.Data[(int)Offsets.IpcData + 5] == 0x01);
         }
+
+        public static ushort ScanEventUnk0(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 80 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x1C) == 284);
+        }
+
+        public static ushort ScanEventUnk1(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 56 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
+        }
     }
 }

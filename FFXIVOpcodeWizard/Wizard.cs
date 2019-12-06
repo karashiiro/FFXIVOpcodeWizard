@@ -117,6 +117,15 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("EventFinish found at opcode 0x{0}!", eventFinish.ToString("X4"));
             output.Append("EventFinish: 0x").Append(eventFinish.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
+            // EventUnk0 & EventUnk1
+            Console.WriteLine("Scanning for EventUnk0 and EventUnk1. Please cast your line and catch a fish.");
+            ushort eventUnk1 = PacketProcessors.ScanEventUnk1(pq);
+            Console.WriteLine("EventUnk1 found at opcode 0x{0}!", eventUnk1.ToString("X4"));
+            output.Append("EventUnk1: 0x").Append(eventUnk1.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+            ushort eventUnk0 = PacketProcessors.ScanEventUnk0(pq);
+            Console.WriteLine("EventUnk0 found at opcode 0x{0}!", eventUnk0.ToString("X4"));
+            output.Append("EventUnk0: 0x").Append(eventUnk0.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // Done
             Console.WriteLine("All packets found!\n\n");
             Console.WriteLine(output.ToString());
