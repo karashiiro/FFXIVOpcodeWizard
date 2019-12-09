@@ -143,6 +143,12 @@ namespace FFXIVOpcodeWizard
         public void Run(LinkedList<Packet> pq)
         {
             StringBuilder output = new StringBuilder();
+
+            Console.WriteLine("The following packets are to be scanned:");
+            for (var i = 0; i < wizards.Count; i++)
+                Console.WriteLine($"#{i}: {wizards.ElementAt(i).OpName}");
+
+            Console.WriteLine();
             
             // Game Version
             Console.WriteLine("Please enter the current game version: ");
