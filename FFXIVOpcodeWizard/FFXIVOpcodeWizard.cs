@@ -2,6 +2,7 @@
 using Machina.FFXIV;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -31,7 +32,7 @@ namespace FFXIVOpcodeWizard
             // Initialize Machina
             FFXIVNetworkMonitor monitor = new FFXIVNetworkMonitor
             {
-                MessageReceived = OnMessageRecieved,
+                MessageReceived = OnMessageReceived,
                 MessageSent = OnMessageSent,
                 MonitorType = MonitorType
             };
@@ -41,7 +42,7 @@ namespace FFXIVOpcodeWizard
             Wizard.Run(pq);
         }
 
-        static void OnMessageRecieved(string connection, long epoch, byte[] data)
+        static void OnMessageReceived(string connection, long epoch, byte[] data)
         {
             OnMessage(connection, epoch, data, "inbound");
         }

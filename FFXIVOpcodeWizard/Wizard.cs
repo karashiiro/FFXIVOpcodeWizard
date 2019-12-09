@@ -15,7 +15,19 @@ namespace FFXIVOpcodeWizard
             Console.WriteLine("Please enter the current game version: ");
             Regex versionNameFilter = new Regex(@"[^0-9.]");
             string gamePatch = versionNameFilter.Replace(Console.ReadLine(), (match) => "");
-            
+
+            Console.WriteLine("Scanning for CfPreferredRole");
+            Console.WriteLine("Please stand by.");
+            ushort preferredRole = PacketProcessors.ScanCfPreferredRole(pq);
+            Console.WriteLine("CfPreferredRole found at opcode 0x{0}!", preferredRole.ToString("X4"));
+            output.Append("CfPreferredRole: 0x").Append(preferredRole.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
+            Console.WriteLine("Scanning for CfNotifyPop");
+            Console.WriteLine("Please queue for The Vault as undersized party and withdraw.");
+            ushort notifyPop = PacketProcessors.ScanCfNotifyPop(pq);
+            Console.WriteLine("CfNotifyPop found at opcode 0x{0}!", notifyPop.ToString("X4"));
+            output.Append("CfNotifyPop: 0x").Append(notifyPop.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+
             // PlayerSetup
             Console.WriteLine("Scanning for PlayerSetup. Please enter your character name.");
             string playerName = Console.ReadLine();

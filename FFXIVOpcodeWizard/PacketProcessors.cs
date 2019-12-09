@@ -1,6 +1,7 @@
 ﻿using Sapphire.Common.Network;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,21 +15,15 @@ namespace FFXIVOpcodeWizard
         /// </summary>
         /// <param name="pq"></param>
         /// <returns></returns>
-        private static MetaPacket ScanGeneric(LinkedList<Packet> pq)
+        private static MetaPacket ScanGeneric(Packet basePacket)
         {
-            while (pq.First == null)
-            {
-                Thread.Sleep(2);
-            }
-
-            Packet basePacket = pq.First();
-            pq.RemoveFirst();
-            MetaPacket mp = new MetaPacket(basePacket)
+            var mp = new MetaPacket(basePacket)
             {
                 PacketSize = BitConverter.ToUInt32(basePacket.Data, (int)Offsets.PacketSize),
                 SegmentType = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.SegmentType),
                 Opcode = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.IpcType)
             };
+
             return mp;
         }
 
@@ -40,16 +35,27 @@ namespace FFXIVOpcodeWizard
         /// <returns></returns>
         private static ushort ScanInbound(LinkedList<Packet> pq, Func<MetaPacket, bool> del)
         {
-            MetaPacket foundPacket = null;
-            while (foundPacket == null ||
-                foundPacket.Direction == "outbound")
+            MetaPacket foundPacket;
+            while (true)
             {
-                MetaPacket temp = ScanGeneric(pq);
-                if (del(temp))
+                while (pq.First == null)
                 {
-                    foundPacket = temp;
-                    break;
+                    Thread.Sleep(2);
                 }
+
+                if (pq.First.Value.Direction == "outbound")
+                {
+                    pq.RemoveFirst();
+                    continue;
+                }
+
+                foundPacket = ScanGeneric(pq.First(p => p.Direction == "inbound"));
+                pq.RemoveFirst();
+
+                Debug.Print($"RECV => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
+
+                if (del(foundPacket))
+                    break;
             }
             return foundPacket.Opcode;
         }
@@ -62,16 +68,27 @@ namespace FFXIVOpcodeWizard
         /// <returns></returns>
         private static ushort ScanOutbound(LinkedList<Packet> pq, Func<MetaPacket, bool> del)
         {
-            MetaPacket foundPacket = null;
-            while (foundPacket == null ||
-                foundPacket.Direction == "inbound")
+            MetaPacket foundPacket;
+            while (true)
             {
-                MetaPacket temp = ScanGeneric(pq);
-                if (del(temp))
+                while (pq.First == null || pq.First.Value.Direction != "outbound")
                 {
-                    foundPacket = temp;
-                    break;
+                    Thread.Sleep(2);
                 }
+
+                if (pq.First.Value.Direction == "inbound")
+                {
+                    pq.RemoveFirst();
+                    continue;
+                }
+
+                foundPacket = ScanGeneric(pq.First(p => p.Direction == "outbound"));
+                pq.RemoveFirst();
+
+                Debug.Print($"SEND => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
+
+                if (del(foundPacket))
+                    break;
             }
             return foundPacket.Opcode;
         }
@@ -170,6 +187,30 @@ namespace FFXIVOpcodeWizard
         public static ushort ScanUseMooch(LinkedList<Packet> pq)
         {
             return ScanInbound(pq, (packet) => packet.PacketSize == 80 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x18) == 2587);
+        }
+
+        public static ushort ScanCfPreferredRole(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) =>
+            {
+                if (packet.PacketSize != 48)
+                    return false;
+
+                var allInRange = true;
+
+                for (var i = 1; i < 10; i++)
+                {
+                    if (packet.Data[(int)Offsets.IpcData + i] > 4 || packet.Data[(int)Offsets.IpcData + i] < 1)
+                        allInRange = false;
+                }
+
+                return allInRange;
+            });
+        }
+
+        public static ushort ScanCfNotifyPop(LinkedList<Packet> pq)
+        {
+            return ScanInbound(pq, (packet) => packet.PacketSize == 64 && packet.Data[(int)Offsets.IpcData + 20] == 0x22);
         }
     }
 }
