@@ -10,9 +10,6 @@ namespace FFXIVOpcodeWizard
 {
     class FFXIVOpcodeWizard
     {
-        [DllImport("wpcap.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern IntPtr pcap_open(string source, int snaplen, int flags, int read_timeout, IntPtr auth, StringBuilder errbuff);
-
         static LinkedList<Packet> pq;
 
         static void Main(string[] args)
@@ -38,8 +35,10 @@ namespace FFXIVOpcodeWizard
             };
             monitor.Start();
 
+            var wizardProcessor = new WizardProcessor();
+
             // Run packet ID stuff
-            Wizard.Run(pq);
+            wizardProcessor.Run(pq);
         }
 
         static void OnMessageReceived(string connection, long epoch, byte[] data)
