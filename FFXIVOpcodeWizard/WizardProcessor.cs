@@ -52,6 +52,22 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize > 1552 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 44) == 17837);
 
+            RegisterPacketWizard("MarketTaxRates",
+                "Please visit a retainer counter and request information about market tax rates...", PacketDirection.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 72)
+                        return false;
+
+                    var rate1 = BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 8);
+                    var rate2 = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 12);
+                    var rate3 = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 16);
+                    var rate4 = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 20);
+
+                    return (rate1 > 0 && rate1 <= 7) && (rate2 > 0 && rate2 <= 7) && (rate3 > 0 && rate3 <= 7) &&
+                           (rate4 > 0 && rate4 <= 7);
+                });
+
 
             RegisterPacketWizard("NpcSpawn", "Scanning for NpcSpawn. Please enter your retainer name.",
                 PacketDirection.Server,
