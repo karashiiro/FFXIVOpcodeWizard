@@ -22,6 +22,11 @@ namespace FFXIVOpcodeWizard
                 (packet, parameters) => packet.PacketSize > 300 &&
                                         Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
 
+            RegisterPacketWizard("UpdateHpMpTp", "Waiting for HP/MP update; if this doesn't complete, alter your HP or MP and allow your stats to regenerate completely.", PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) == 10000 &&
+                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 6) == 1000);
+
 
             RegisterPacketWizard("ClientTrigger", "Please draw your weapon.", PacketDirection.Client,
                 (packet, _) =>
