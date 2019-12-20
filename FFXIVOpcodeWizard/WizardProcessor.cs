@@ -40,13 +40,15 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 40);
             //=================
             string searchMessage = string.Empty;
-            RegisterPacketWizard("SetSearchInfoHandler", "Please enter a search message here, and then set it in-game:", PacketDirection.Client,
+            RegisterPacketWizard("SetSearchInfoHandler", "Please enter a somewhat lengthy search message here, and then set it in-game:", PacketDirection.Client,
                 (packet, parameters) =>
                 {
                     searchMessage = parameters[0];
                     return Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1;
                 }, 1);
             RegisterPacketWizard("SetSearchInfo", string.Empty, PacketDirection.Server,
+                (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
+            RegisterPacketWizard("ExamineSearchComment", "Close the search information editor, and then open your search information with the \"View Search Info\" button...", PacketDirection.Server,
                 (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
             //=================
             int marketBoardItemDetectionId = 17837;
