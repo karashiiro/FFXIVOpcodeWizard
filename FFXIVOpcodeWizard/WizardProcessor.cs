@@ -36,11 +36,14 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 56 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 4) == 1);
             //=================
+            RegisterPacketWizard("ChatHandler", "Please enter a message, and then /say it in-game...", PacketDirection.Client,
+                (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
+            //=================
             RegisterPacketWizard("Playtime", "Please type /playtime...", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 40);
             //=================
             string searchMessage = string.Empty;
-            RegisterPacketWizard("SetSearchInfoHandler", "Please enter a somewhat lengthy search message here, and then set it in-game:", PacketDirection.Client,
+            RegisterPacketWizard("SetSearchInfoHandler", "Please enter a somewhat lengthy search message here, and then set it in-game...", PacketDirection.Client,
                 (packet, parameters) =>
                 {
                     searchMessage = parameters[0];
@@ -48,8 +51,12 @@ namespace FFXIVOpcodeWizard
                 }, 1);
             RegisterPacketWizard("SetSearchInfo", string.Empty, PacketDirection.Server,
                 (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
-            RegisterPacketWizard("ExamineSearchComment", "Close the search information editor, and then open your search information with the \"View Search Info\" button...", PacketDirection.Server,
-                (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
+            RegisterPacketWizard("ExamineSearchInfo", "Close the search information editor, and then open your search information with the \"View Search Info\" button...", PacketDirection.Server,
+                (packet, _) => packet.PacketSize > 232 &&
+                               Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
+            //=================
+            RegisterPacketWizard("Examine", "Please enter a nearby character's name, and then examine their equipment...", PacketDirection.Server,
+                (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
             //=================
             int marketBoardItemDetectionId = 17837;
             RegisterPacketWizard("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
