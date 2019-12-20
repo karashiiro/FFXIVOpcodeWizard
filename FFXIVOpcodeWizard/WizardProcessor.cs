@@ -27,7 +27,6 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 48 &&
                                BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) == 10000 &&
                                BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 6) == 1000);
-
             //=================
             RegisterPacketWizard("ClientTrigger", "Please draw your weapon.", PacketDirection.Client,
                 (packet, _) =>
@@ -39,7 +38,7 @@ namespace FFXIVOpcodeWizard
             RegisterPacketWizard("ChatHandler", "Please enter a message, and then /say it in-game...", PacketDirection.Client,
                 (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
             //=================
-            RegisterPacketWizard("Playtime", "Please type /playtime...", PacketDirection.Server,
+            RegisterPacketWizard("Playtime", "Please quickly type /playtime...", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 40);
             //=================
             string searchMessage = string.Empty;
