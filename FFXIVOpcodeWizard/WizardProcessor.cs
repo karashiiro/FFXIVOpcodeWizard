@@ -48,7 +48,7 @@ namespace FFXIVOpcodeWizard
                     searchMessage = parameters[0];
                     return Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1;
                 }, 1);
-            RegisterPacketWizard("SetSearchInfo", string.Empty, PacketDirection.Server,
+            RegisterPacketWizard("UpdateSearchInfo", string.Empty, PacketDirection.Server,
                 (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
             RegisterPacketWizard("ExamineSearchInfo", "Close the search information editor, and then open your search information with the \"View Search Info\" button...", PacketDirection.Server,
                 (packet, _) => packet.PacketSize > 232 &&
