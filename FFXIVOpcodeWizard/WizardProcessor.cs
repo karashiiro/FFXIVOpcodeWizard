@@ -85,8 +85,8 @@ namespace FFXIVOpcodeWizard
                     var rate3 = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 16);
                     var rate4 = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 20);
 
-                    return (rate1 > 0 && rate1 <= 7) && (rate2 > 0 && rate2 <= 7) && (rate3 > 0 && rate3 <= 7) &&
-                           (rate4 > 0 && rate4 <= 7);
+                    return (rate1 >= 0 && rate1 <= 7) && (rate2 >= 0 && rate2 <= 7) && (rate3 >= 0 && rate3 <= 7) &&
+                           (rate4 >= 0 && rate4 <= 7);
                 });
             //=================
             RegisterPacketWizard("NpcSpawn", "Scanning for NpcSpawn. Please enter your retainer name.",
