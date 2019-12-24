@@ -55,7 +55,7 @@ namespace FFXIVOpcodeWizard
                                Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
             //=================
             RegisterPacketWizard("Examine", "Please enter a nearby character's name, and then examine their equipment...", PacketDirection.Server,
-                (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
+                (packet, parameters) => packet.PacketSize == 1016 && Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
             //=================
             int marketBoardItemDetectionId = 17837;
             RegisterPacketWizard("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
