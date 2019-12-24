@@ -128,12 +128,13 @@ namespace FFXIVOpcodeWizard
                                packet.Data[(int) Offsets.IpcData + 4] == 0x14 &&
                                packet.Data[(int) Offsets.IpcData + 5] == 0x01);
             //=================
-            RegisterPacketWizard("EventUnk0", "Please cast your line and catch a fish.", PacketDirection.Server,
+            RegisterPacketWizard("EventUnk1", "Please cast your line and catch a fish.", PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 56 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
+
+            RegisterPacketWizard("EventUnk0", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x1C) == 284);
-            RegisterPacketWizard("EventUnk1", string.Empty, PacketDirection.Server,
-                (packet, _) => packet.PacketSize == 56 &&
-                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x08) == 257);
             //=================
             RegisterPacketWizard("UseMooch", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
                 PacketDirection.Server,
