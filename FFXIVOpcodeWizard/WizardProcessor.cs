@@ -18,40 +18,61 @@ namespace FFXIVOpcodeWizard
 
         private void Setup()
         {
+            //=================
             RegisterPacketWizard("PlayerSetup", "Please enter your character name and log in.", PacketDirection.Server,
                 (packet, parameters) => packet.PacketSize > 300 &&
                                         Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
-
-
+            //=================
+            RegisterPacketWizard("UpdateHpMpTp", "Waiting for HP/MP update; if this doesn't complete, alter your HP or MP and allow your stats to regenerate completely.", PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) == 10000 &&
+                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 6) == 1000);
+            //=================
             RegisterPacketWizard("ClientTrigger", "Please draw your weapon.", PacketDirection.Client,
                 (packet, _) =>
                     packet.PacketSize == 64 && BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == 1);
             RegisterPacketWizard("ActorControl", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 56 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 4) == 1);
-
-
-            RegisterPacketWizard("Playtime", "Please type /playtime...", PacketDirection.Server,
+            //=================
+            RegisterPacketWizard("ChatHandler", "Please enter a message, and then /say it in-game...", PacketDirection.Client,
+                (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
+            //=================
+            RegisterPacketWizard("Playtime", "Please quickly type /playtime...", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 40);
-
-
+            //=================
+            string searchMessage = string.Empty;
+            RegisterPacketWizard("SetSearchInfoHandler", "Please enter a somewhat lengthy search message here, and then set it in-game...", PacketDirection.Client,
+                (packet, parameters) =>
+                {
+                    searchMessage = parameters[0];
+                    return Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1;
+                }, 1);
+            RegisterPacketWizard("SetSearchInfo", string.Empty, PacketDirection.Server,
+                (packet, _) => Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
+            RegisterPacketWizard("ExamineSearchInfo", "Close the search information editor, and then open your search information with the \"View Search Info\" button...", PacketDirection.Server,
+                (packet, _) => packet.PacketSize > 232 &&
+                               Encoding.UTF8.GetString(packet.Data).IndexOf(searchMessage) != -1);
+            //=================
+            RegisterPacketWizard("Examine", "Please enter a nearby character's name, and then examine their equipment...", PacketDirection.Server,
+                (packet, parameters) => Encoding.UTF8.GetString(packet.Data).IndexOf(parameters[0]) != -1, 1);
+            //=================
+            int marketBoardItemDetectionId = 17837;
             RegisterPacketWizard("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 208 &&
-                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 56) == 17837);
-
-
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 56) == marketBoardItemDetectionId);
             RegisterPacketWizard("MarketBoardItemListingCount",
                 "Please open the market board listings for Grade 7 Dark Matter...", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == 17837);
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == marketBoardItemDetectionId);
             RegisterPacketWizard("MarketBoardItemListingHistory", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 1080 &&
-                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == 17837);
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == marketBoardItemDetectionId);
             RegisterPacketWizard("MarketBoardItemListing", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize > 1552 &&
-                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 44) == 17837);
-
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 44) == marketBoardItemDetectionId);
+            //=================
             RegisterPacketWizard("MarketTaxRates",
                 "Please visit a retainer counter and request information about market tax rates...", PacketDirection.Server,
                 (packet, _) =>
@@ -67,37 +88,33 @@ namespace FFXIVOpcodeWizard
                     return (rate1 > 0 && rate1 <= 7) && (rate2 > 0 && rate2 <= 7) && (rate3 > 0 && rate3 <= 7) &&
                            (rate4 > 0 && rate4 <= 7);
                 });
-
-
+            //=================
             RegisterPacketWizard("NpcSpawn", "Scanning for NpcSpawn. Please enter your retainer name.",
                 PacketDirection.Server,
                 (packet, parameters) => packet.PacketSize > 592 &&
                                         Encoding.UTF8.GetString(packet.Data.Skip(592).Take(parameters[0].Length)
                                             .ToArray()) == parameters[0], 1);
+            //=================
             RegisterPacketWizard("PlayerSpawn", "Scanning for PlayerSpawn. Please enter your world ID.",
                 PacketDirection.Server, (packet, parameters) =>
                     packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), 1);
-
-
+            //=================
             RegisterPacketWizard("ItemInfo", "Please teleport and open your chocobo saddlebag...",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 96 &&
                                BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 8) == 4000);
-
-
+            //=================
             RegisterPacketWizard("UpdateClassInfo",
                 "Scanning for UpdateClassInfo. Please enter the level of the job you will switch to and switch to it.",
                 PacketDirection.Server, (packet, parameters) =>
                     packet.PacketSize == 48 && BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), 1);
-
-
+            //=================
             RegisterPacketWizard("InitZone", "Please teleport to New Gridania.", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 128 &&
                                BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 2) == 132);
-
-
+            //=================
             RegisterPacketWizard("EventStart", "Please begin fishing and put your rod away immediately",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 56 &&
@@ -110,7 +127,7 @@ namespace FFXIVOpcodeWizard
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData) == 0x150001 &&
                                packet.Data[(int) Offsets.IpcData + 4] == 0x14 &&
                                packet.Data[(int) Offsets.IpcData + 5] == 0x01);
-
+            //=================
             RegisterPacketWizard("EventUnk1", "Please cast your line and catch a fish.", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 56 &&
                                BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
@@ -118,13 +135,12 @@ namespace FFXIVOpcodeWizard
             RegisterPacketWizard("EventUnk0", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x1C) == 284);
-
+            //=================
             RegisterPacketWizard("UseMooch", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x18) == 2587);
-
-
+            //=================
             RegisterPacketWizard("CfPreferredRole", "Please wait.", PacketDirection.Server, (packet, _) =>
             {
                 if (packet.PacketSize != 48)
@@ -138,6 +154,7 @@ namespace FFXIVOpcodeWizard
 
                 return allInRange;
             });
+            //=================
             RegisterPacketWizard("CfNotifyPop", "Please queue for \"The Vault\" as an undersized party.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 64 && packet.Data[(int) Offsets.IpcData + 20] == 0x22);
@@ -216,7 +233,7 @@ namespace FFXIVOpcodeWizard
                         break;
                 }
 
-                Console.WriteLine($"{wizard.OpName} found at opcode 0x{opCode:x}!");
+                Console.WriteLine($"{wizard.OpName} found at opcode 0x{opCode.ToString("X4")}!");
                 output.Append(wizard.OpName).Append(": 0x").Append(opCode.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
 
                 Console.WriteLine();
