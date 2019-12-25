@@ -141,7 +141,7 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x18) == 2587);
             //=================
-            RegisterPacketWizard("CfPreferredRole", "Please wait.", PacketDirection.Server, (packet, _) =>
+            RegisterPacketWizard("CFPreferredRole", "Please wait.", PacketDirection.Server, (packet, _) =>
             {
                 if (packet.PacketSize != 48)
                     return false;
@@ -155,7 +155,7 @@ namespace FFXIVOpcodeWizard
                 return allInRange;
             });
             //=================
-            RegisterPacketWizard("CfNotifyPop", "Please queue for \"The Vault\" as an undersized party.",
+            RegisterPacketWizard("CFNotifyPop", "Please queue for \"The Vault\" as an undersized party.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 64 && packet.Data[(int) Offsets.IpcData + 20] == 0x22);
         }
