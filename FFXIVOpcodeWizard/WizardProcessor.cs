@@ -111,7 +111,11 @@ namespace FFXIVOpcodeWizard
                     packet.PacketSize == 48 && BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), 1);
             //=================
-            RegisterPacketWizard("InitZone", "Please teleport to New Gridania.", PacketDirection.Server,
+            RegisterPacketWizard("CurrencyCrystalInfo", "Please enter the number of Lightning Crystals you have, and then teleport to New Gridania.", PacketDirection.Server,
+                (packet, parameters) => packet.PacketSize == 64 &&
+                    BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x8) == int.Parse(parameters[0]), 1);
+            //=================
+            RegisterPacketWizard("InitZone", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 128 &&
                                BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 2) == 132);
             //=================
@@ -130,11 +134,15 @@ namespace FFXIVOpcodeWizard
             //=================
             RegisterPacketWizard("EventUnk1", "Please cast your line and catch a fish.", PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 56 &&
-                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x08) == 257);
-
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x08) == 257);
             RegisterPacketWizard("EventUnk0", string.Empty, PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x1C) == 284);
+            //=================
+            RegisterPacketWizard("UpdateInventorySlot", "Please purchase a Pill Bug to use as bait.",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 96 &&
+                               BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 0x10) == 2587);
             //=================
             RegisterPacketWizard("UseMooch", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
                 PacketDirection.Server,
