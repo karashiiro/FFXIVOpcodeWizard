@@ -1,9 +1,17 @@
 ﻿using Machina;
 using Machina.FFXIV;
+using System;
 using System.Collections.Generic;
 
 namespace FFXIVOpcodeWizard
 {
+    public enum Region : byte
+    {
+        Global,
+        KR,
+        CN
+    }
+
     class FFXIVOpcodeWizard
     {
         static LinkedList<Packet> pq;
@@ -22,12 +30,22 @@ namespace FFXIVOpcodeWizard
             // Packet queue
             pq = new LinkedList<Packet>();
 
+            // Get game region
+            Region region = Region.Global;
+            Console.WriteLine("Are you using the Chinese game client? [y/N]");
+            string regionPrompt = Console.ReadLine();
+            if (regionPrompt.ToLower().StartsWith("y"))
+            {
+                region = Region.CN;
+            }
+
             // Initialize Machina
             FFXIVNetworkMonitor monitor = new FFXIVNetworkMonitor
             {
                 MessageReceived = OnMessageReceived,
                 MessageSent = OnMessageSent,
-                MonitorType = MonitorType
+                MonitorType = MonitorType,
+                Region = region
             };
             monitor.Start();
 

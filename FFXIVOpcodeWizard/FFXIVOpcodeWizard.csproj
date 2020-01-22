@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FFXIVNetworkMonitor.cs" />
     <Compile Include="FFXIVOpcodeWizard.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="PacketProcessors.cs" />
