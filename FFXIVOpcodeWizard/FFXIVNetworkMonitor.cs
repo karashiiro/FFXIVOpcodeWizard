@@ -87,7 +87,7 @@ namespace FFXIVOpcodeWizard
             _monitor = new TCPNetworkMonitor();
             _monitor.ProcessID = ProcessID;
             if (_monitor.ProcessID == 0)
-                _monitor.WindowName = Region == Common.Region.CN ? "最终幻想XIV" : "FINAL FANTASY XIV";
+                _monitor.WindowName = Region == Region.CN ? "最终幻想XIV" : "FINAL FANTASY XIV";
             _monitor.MonitorType = MonitorType;
             _monitor.LocalIP = LocalIP;
             _monitor.UseSocketFilter = UseSocketFilter;
