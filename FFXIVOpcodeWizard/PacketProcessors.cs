@@ -48,7 +48,7 @@ namespace FFXIVOpcodeWizard
                     continue;
                 }
 
-                foundPacket = ScanGeneric(pq.First(p => p.Direction == "inbound"));
+                foundPacket = ScanGeneric(pq.First.Value);
                 pq.RemoveFirst();
 
                 Debug.Print($"RECV => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
@@ -81,7 +81,7 @@ namespace FFXIVOpcodeWizard
                     continue;
                 }
 
-                foundPacket = ScanGeneric(pq.First(p => p.Direction == "outbound"));
+                foundPacket = ScanGeneric(pq.First.Value);
                 pq.RemoveFirst();
 
                 Debug.Print($"SEND => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
