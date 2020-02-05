@@ -46,10 +46,10 @@ namespace FFXIVOpcodeWizard
                 (packet, parameters) => packet.PacketSize > 300 && includeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
 
             //=================
-            RegisterPacketWizard("UpdateHpMpTp", "Waiting for HP/MP update; if this doesn't complete, alter your HP or MP and allow your stats to regenerate completely.", PacketDirection.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) == 10000 &&
-                               BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 6) == 1000);
+            RegisterPacketWizard("UpdateHpMpTp", "Enter your max HP, then alter your HP or MP and allow your stats to regenerate completely.", PacketDirection.Server,
+                (packet, parameters) => packet.PacketSize == 48 &&
+                    BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData).ToString() == parameters[0] && // HP equals MaxHP
+                    BitConverter.ToUInt16(packet.Data, (int) Offsets.IpcData + 4) == 10000, 1); // MP equals 10000
             //=================
             RegisterPacketWizard("ClientTrigger", "Please draw your weapon.", PacketDirection.Client,
                 (packet, _) =>
