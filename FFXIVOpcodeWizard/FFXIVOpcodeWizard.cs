@@ -16,28 +16,24 @@ namespace FFXIVOpcodeWizard
     {
         static LinkedList<Packet> pq;
 
+        static bool readYes()
+        {
+            return Console.ReadLine().ToLower().StartsWith("y");
+        }
+
         static void Main(string[] args)
         {
-            // Network monitor type
-            TCPNetworkMonitor.NetworkMonitorType MonitorType = TCPNetworkMonitor.NetworkMonitorType.RawSocket;
-            /*StringBuilder errbuff = new StringBuilder();
-            pcap_open("", 0, 0, 0, new IntPtr(), errbuff);
-            if (errbuff.ToString() != "")
-            {
-                MonitorType = TCPNetworkMonitor.NetworkMonitorType.WinPCap;
-            }*/
-
             // Packet queue
             pq = new LinkedList<Packet>();
 
             // Get game region
-            Region region = Region.Global;
             Console.WriteLine("Are you using the Chinese game client? [y/N]");
-            string regionPrompt = Console.ReadLine();
-            if (regionPrompt.ToLower().StartsWith("y"))
-            {
-                region = Region.CN;
-            }
+            Region region = readYes() ? Region.CN : Region.Global;
+
+            Console.WriteLine("Use WinPcap instead of RawSocket? [y/N]");
+            TCPNetworkMonitor.NetworkMonitorType MonitorType = readYes() 
+                ? TCPNetworkMonitor.NetworkMonitorType.WinPCap
+                : TCPNetworkMonitor.NetworkMonitorType.RawSocket;
 
             // Initialize Machina
             FFXIVNetworkMonitor monitor = new FFXIVNetworkMonitor
