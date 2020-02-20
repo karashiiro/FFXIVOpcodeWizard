@@ -117,7 +117,7 @@ namespace FFXIVOpcodeWizard
             RegisterPacketWizard("NpcSpawn", "Scanning for NpcSpawn. Please enter your retainer name.",
                 PacketDirection.Server,
                 (packet, parameters) => packet.PacketSize > 624 && 
-                    includeBytes(packet.Data.Skip(592).Take(32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])), 1);
+                    includeBytes(packet.Data.Skip(588).Take(32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])), 1);
             //=================
             RegisterPacketWizard("PlayerSpawn", "Scanning for PlayerSpawn. Please enter your world ID.",
                 PacketDirection.Server, (packet, parameters) =>
