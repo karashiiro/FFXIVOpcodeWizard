@@ -58,6 +58,16 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 56 &&
                                BitConverter.ToUInt32(packet.Data, (int) Offsets.IpcData + 4) == 1);
             //=================
+            RegisterPacketWizard("ActorControlSelf", "Please enter sanctuary and wait for rested bonus gains", PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 64 &&
+                               BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData) == 24 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 4) <= 604800 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 8) == 0 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 12) == 0 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 16) == 0 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 20) == 0 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 24) == 0);
+            //=================
             RegisterPacketWizard("ChatHandler", "Please enter a message, and then /say it in-game...", PacketDirection.Client,
                 (packet, parameters) => includeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
             //=================
@@ -189,7 +199,66 @@ namespace FFXIVOpcodeWizard
             //=================
             RegisterPacketWizard("CFNotifyPop", "Please queue for \"The Vault\" as an undersized party.",
                 PacketDirection.Server,
-                (packet, _) => packet.PacketSize == 64 && packet.Data[(int) Offsets.IpcData + 20] == 0x22);
+                (packet, _) => packet.PacketSize == 64 && packet.Data[(int)Offsets.IpcData + 20] == 0x22);
+            //=================
+            RegisterPacketWizard("ActorSetPos", "Please find an Aetheryte and teleport to Mist East.",
+                PacketDirection.Server,
+                (packet, _) => {
+                    if (packet.PacketSize != 56) return false;
+
+                    var x = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 8);
+                    var y = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 12);
+                    var z = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 16);
+
+                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;
+                }
+            );
+            //=================
+            RegisterPacketWizard("ActorCast", "Switch to White Mage, and cast Bright",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData) == 16533);
+            //=================
+            RegisterPacketWizard("Effect", "Wait for Bright caused damage",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 16533);
+            //=================
+            RegisterPacketWizard("AddStatusEffect", "Please use Dia",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 30) == 1871);
+            //=================
+            RegisterPacketWizard("StatusEffectList", "Please wait",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 416 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 20) == 1871);
+            //=================
+            RegisterPacketWizard("ActorGauge", "Wait for gauge changes, then clear the lilies",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                    packet.Data[(int)Offsets.IpcData] == 24 &&
+                    packet.Data[(int)Offsets.IpcData + 5] == 0 &&
+                    packet.Data[(int)Offsets.IpcData + 6] > 0);
+            //=================
+            RegisterPacketWizard("ActorControlTarget", "Place marker 'A' on the ground.",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                    BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData) == 310 &&
+                    BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 4) == 0);
+            //=================
+            RegisterPacketWizard("AoeEffect8", "Attack multiple enemies with Holy",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 668 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 139);
+            //=================
+            RegisterPacketWizard("AoeEffect16", "Attack multiple enemies (>8) with Holy",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 1244 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 139);
+            //=================
+            RegisterPacketWizard("AoeEffect24", "Attack multiple enemies (>16) with Holy",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 1820 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 139);
+            //=================
+            RegisterPacketWizard("AoeEffect32", "Attack multiple enemies (>24) with Holy",
+                PacketDirection.Server,
+                (packet, _) => packet.PacketSize == 2396 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 139);
+
         }
 
         private void RegisterPacketWizard(string opName, string tutorial, PacketDirection scanDirection, Func<MetaPacket, string[], bool> del, int paramCount = 0)
