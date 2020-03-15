@@ -252,21 +252,18 @@ namespace FFXIVOpcodeWizard
                     }
                 }
                 
-                Console.WriteLine($"Scanning for {wizard.ScanDirection} packets...");
+                Console.WriteLine($"Scanning for {wizard.ScanDirection} packets... (Press Ctrl+C to skip)");
 
-                var opCode = 0;
-                switch (wizard.ScanDirection)
+                var opCode = PacketProcessors.Scan(pq, wizard.PacketCheckerFunc, parameters, wizard.ScanDirection, out bool cancelled);
+                if (cancelled)
                 {
-                    case PacketDirection.Server:
-                        opCode = PacketProcessors.ScanInbound(pq, wizard.PacketCheckerFunc, parameters);
-                        break;
-                    case PacketDirection.Client:
-                        opCode = PacketProcessors.ScanOutbound(pq, wizard.PacketCheckerFunc, parameters);
-                        break;
+                    Console.WriteLine($"{wizard.OpName} scanning skipped");
                 }
-
-                Console.WriteLine($"{wizard.OpName} found at opcode 0x{opCode.ToString("X4")}!");
-                output.Append(wizard.OpName).Append(": 0x").Append(opCode.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+                else
+                {
+                    Console.WriteLine($"{wizard.OpName} found at opcode 0x{opCode.ToString("X4")}!");
+                    output.Append(wizard.OpName).Append(": 0x").Append(opCode.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+                }
 
                 Console.WriteLine();
                 count++;

@@ -53,15 +53,15 @@ namespace FFXIVOpcodeWizard
 
         static void OnMessageReceived(string connection, long epoch, byte[] data)
         {
-            OnMessage(connection, epoch, data, "inbound");
+            OnMessage(connection, epoch, data, PacketDirection.Server);
         }
 
         static void OnMessageSent(string connection, long epoch, byte[] data)
         {
-            OnMessage(connection, epoch, data, "outbound");
+            OnMessage(connection, epoch, data, PacketDirection.Client);
         }
 
-        static void OnMessage(string connection, long epoch, byte[] data, string direction)
+        static void OnMessage(string connection, long epoch, byte[] data, PacketDirection direction)
         {
             pq.AddLast(new Packet(connection, epoch, data, direction));
         }

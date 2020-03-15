@@ -5,9 +5,9 @@
         public string Connection;
         public long Epoch;
         public byte[] Data;
-        public string Direction;
+        public PacketDirection Direction;
 
-        public Packet(string connection, long epoch, byte[] data, string direction)
+        public Packet(string connection, long epoch, byte[] data, PacketDirection direction)
         {
             Connection = connection;
             Epoch = epoch;
@@ -21,7 +21,7 @@
         public string Connection;
         public long Epoch;
         public byte[] Data;
-        public string Direction;
+        public PacketDirection Direction;
 
         public uint PacketSize;
         public ushort SegmentType;
