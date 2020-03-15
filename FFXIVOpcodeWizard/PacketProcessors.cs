@@ -26,23 +26,32 @@ namespace FFXIVOpcodeWizard
             return mp;
         }
 
+        private static bool scanning = false;
+
         /// <summary>
-        /// Returns the opcode of the first inbound packet to meet the conditions outlined by del.
+        /// Returns the opcode of the first packet to meet the conditions outlined by del.
         /// </summary>
         /// <param name="pq"></param>
         /// <param name="del"></param>
         /// <returns></returns>
-        public static ushort ScanInbound(LinkedList<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters)
+        public static ushort Scan(LinkedList<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters, PacketDirection direction, out bool cancelled)
         {
+            Console.CancelKeyPress += Console_CancelKeyPress;
             MetaPacket foundPacket;
-            while (true)
+
+            scanning = true;
+            while (scanning)
             {
                 while (pq.First == null)
                 {
                     Thread.Sleep(2);
+                    if (!scanning)
+                    {
+                        goto Cancelled;
+                    }
                 }
 
-                if (pq.First.Value.Direction == "outbound")
+                if (pq.First.Value.Direction != direction)
                 {
                     pq.RemoveFirst();
                     continue;
@@ -51,45 +60,27 @@ namespace FFXIVOpcodeWizard
                 foundPacket = ScanGeneric(pq.First.Value);
                 pq.RemoveFirst();
 
-                Debug.Print($"RECV => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
+                Debug.Print($"{direction} => {foundPacket.Opcode:x4} - Length: {foundPacket.Data.Length}");
 
                 if (del(foundPacket, parameters))
-                    break;
+                {
+                    scanning = false;
+                    cancelled = false;
+                    return foundPacket.Opcode;
+                }
             }
-            return foundPacket.Opcode;
+Cancelled:
+            cancelled = true;
+            return 0;
         }
 
-        /// <summary>
-        /// Returns the opcode of the first outbound packet to meet the conditions outlined by del.
-        /// </summary>
-        /// <param name="pq"></param>
-        /// <param name="del"></param>
-        /// <returns></returns>
-        public static ushort ScanOutbound(LinkedList<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters)
+        private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            MetaPacket foundPacket;
-            while (true)
+            if (scanning)
             {
-                while (pq.First == null)
-                {
-                    Thread.Sleep(2);
-                }
-
-                if (pq.First.Value.Direction == "inbound")
-                {
-                    pq.RemoveFirst();
-                    continue;
-                }
-
-                foundPacket = ScanGeneric(pq.First.Value);
-                pq.RemoveFirst();
-
-                Debug.Print($"SEND => {foundPacket.Opcode:x} - {foundPacket.Data.Length}");
-
-                if (del(foundPacket, parameters))
-                    break;
+                e.Cancel = true;
+                scanning = false;
             }
-            return foundPacket.Opcode;
         }
     }
 }
