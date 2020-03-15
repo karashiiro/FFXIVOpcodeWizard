@@ -214,11 +214,11 @@ namespace FFXIVOpcodeWizard
                 }
             );
             //=================
-            RegisterPacketWizard("ActorCast", "Switch to White Mage, and cast Bright",
+            RegisterPacketWizard("ActorCast", "Switch to White Mage, and cast Glare",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData) == 16533);
             //=================
-            RegisterPacketWizard("Effect", "Wait for Bright caused damage",
+            RegisterPacketWizard("Effect", "Wait for Glare caused damage",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 16533);
             //=================
