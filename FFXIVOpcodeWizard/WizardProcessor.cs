@@ -197,7 +197,7 @@ namespace FFXIVOpcodeWizard
                 return allInRange;
             });
             //=================
-            RegisterPacketWizard("CFNotifyPop", "Please queue for \"The Vault\" as an undersized party.",
+            RegisterPacketWizard("CFNotify", "Please queue for \"The Vault\" as an undersized party.", // CFNotifyPop
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 64 && packet.Data[(int)Offsets.IpcData + 20] == 0x22);
             //=================
