@@ -47,7 +47,7 @@ namespace FFXIVOpcodeWizard
                 (packet, parameters) => packet.PacketSize > 300 && IncludeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
 
             //=================
-            RegisterPacketWizard("UpdateHpMpTp", "Enter your max HP, then alter your HP or MP and allow your stats to regenerate completely.", PacketDirection.Server,
+            RegisterPacketWizard("UpdateHpMpTp", "Enter your max HP, then alter your HP or MP and allow your stats to regenerate completely, or wait for someone else in the vicinity to do the same.", PacketDirection.Server,
                 (packet, parameters) => packet.PacketSize == 48 &&
                     BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData).ToString() == parameters[0] && // HP equals MaxHP
                     BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 4) == 10000, 1); // MP equals 10000
