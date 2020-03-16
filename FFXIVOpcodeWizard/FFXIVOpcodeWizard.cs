@@ -1,5 +1,5 @@
-﻿using Machina;
-using Machina.FFXIV;
+﻿using FFXIVOpcodeWizard.Models;
+using Machina;
 using System;
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace FFXIVOpcodeWizard
     {
         static LinkedList<Packet> pq;
 
-        static bool readYes()
+        static bool ReadYes()
         {
             return Console.ReadLine().ToLower().StartsWith("y");
         }
@@ -28,10 +28,10 @@ namespace FFXIVOpcodeWizard
 
             // Get game region
             Console.WriteLine("Are you using the Chinese game client? [y/N]");
-            Region region = readYes() ? Region.CN : Region.Global;
+            Region region = ReadYes() ? Region.CN : Region.Global;
 
             Console.WriteLine("Use WinPcap instead of RawSocket? [y/N]");
-            TCPNetworkMonitor.NetworkMonitorType MonitorType = readYes() 
+            TCPNetworkMonitor.NetworkMonitorType MonitorType = ReadYes() 
                 ? TCPNetworkMonitor.NetworkMonitorType.WinPCap
                 : TCPNetworkMonitor.NetworkMonitorType.RawSocket;
 

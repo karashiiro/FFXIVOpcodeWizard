@@ -1,4 +1,4 @@
-﻿namespace FFXIVOpcodeWizard
+﻿namespace FFXIVOpcodeWizard.Models
 {
     class Packet
     {

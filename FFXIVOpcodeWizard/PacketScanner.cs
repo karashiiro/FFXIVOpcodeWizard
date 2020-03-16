@@ -1,19 +1,17 @@
-﻿using Sapphire.Common.Network;
+﻿using FFXIVOpcodeWizard.Models;
+using Sapphire.Common.Network;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 
 namespace FFXIVOpcodeWizard
 {
-    static class PacketProcessors
+    static class PacketScanner
     {
         /// <summary>
         /// Pull packets from the queue and do basic parsing on them.
         /// </summary>
-        /// <param name="pq"></param>
-        /// <returns></returns>
         private static MetaPacket ScanGeneric(Packet basePacket)
         {
             var mp = new MetaPacket(basePacket)
@@ -31,9 +29,6 @@ namespace FFXIVOpcodeWizard
         /// <summary>
         /// Returns the opcode of the first packet to meet the conditions outlined by del.
         /// </summary>
-        /// <param name="pq"></param>
-        /// <param name="del"></param>
-        /// <returns></returns>
         public static ushort Scan(LinkedList<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters, PacketDirection direction, out bool cancelled)
         {
             Console.CancelKeyPress += Console_CancelKeyPress;
