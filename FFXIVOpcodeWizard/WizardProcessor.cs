@@ -304,8 +304,7 @@ namespace FFXIVOpcodeWizard
             
             // Game Version
             Console.WriteLine("Please enter the current game version: ");
-            var versionNameFilter = new Regex(@"[^0-9.]", RegexOptions.Compiled);
-            var gamePatch = versionNameFilter.Replace(Console.ReadLine(), (match) => "");
+            var gamePatch = Console.ReadLine();
 
             Console.WriteLine("Press enter to run all wizards or the number of a wizard to skip to it.");
             var skipCount = Console.ReadLine();
