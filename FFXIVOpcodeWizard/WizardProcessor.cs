@@ -349,7 +349,7 @@ namespace FFXIVOpcodeWizard
                 else
                 {
                     Console.WriteLine($"{wizard.OpName} found at opcode 0x{opCode.ToString("X4")}!");
-                    output.Append(wizard.OpName).Append(": 0x").Append(opCode.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
+                    output.Append(wizard.OpName).Append(" = 0x").Append(opCode.ToString("X4")).Append(", // updated ").AppendLine(gamePatch);
                 }
 
                 Console.WriteLine();
