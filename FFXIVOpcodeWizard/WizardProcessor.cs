@@ -48,11 +48,25 @@ namespace FFXIVOpcodeWizard
                 (packet, parameters) => packet.PacketSize > 300 && IncludeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
 
             //=================
+            int maxHP = 0;
             RegisterPacketWizard("UpdateHpMpTp", "Enter your max HP, then alter your HP or MP and allow your stats to regenerate completely:",
                 PacketDirection.Server,
-                (packet, parameters) => packet.PacketSize == 48 &&
-                    BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData).ToString() == parameters[0] && // HP equals MaxHP
-                    BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 4) == 10000, 1); // MP equals 10000
+                (packet, parameters) =>
+                {
+                    if (maxHP == 0)
+                    {
+                        maxHP = int.Parse(parameters[0]);
+                    }
+
+                    return packet.PacketSize == 48 &&
+                        BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData) == maxHP && // HP equals MaxHP
+                        BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 4) == 10000; // MP equals 10000
+                }, 1);
+            //=================
+            RegisterPacketWizard("PlayerStats", "Switch to another job, and then switch back.",
+                PacketDirection.Server, (packet, parameters) =>
+                    packet.PacketSize == 256 && BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 24) == maxHP &&
+                    BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 28) == 10000); // MP equals 10000
             //=================
             RegisterPacketWizard("ClientTrigger", "Please draw your weapon.",
                 PacketDirection.Client,
@@ -138,10 +152,21 @@ namespace FFXIVOpcodeWizard
                            (rate4 >= 0 && rate4 <= 7);
                 });
             //=================
-            RegisterPacketWizard("NpcSpawn", "Please enter one of your retainers' names and summon that retainer:",
+            byte[] retainerBytes = null;
+            RegisterPacketWizard("RetainerInformation", "Please enter one of your retainers' names and then touch the Summoning Bell:",
                 PacketDirection.Server,
-                (packet, parameters) => packet.PacketSize > 624 && 
-                    IncludeBytes(packet.Data.Skip(588).Take(32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])), 1);
+                (packet, parameters) => {
+                    if (retainerBytes == null)
+                    {
+                        retainerBytes = Encoding.UTF8.GetBytes(parameters[0]);
+                    }
+                    return packet.PacketSize == 112 && IncludeBytes(packet.Data.Skip(73).Take(32).ToArray(), retainerBytes);
+                }, 1);
+            //=================
+            RegisterPacketWizard("NpcSpawn", "Please summon that retainer:",
+                PacketDirection.Server,
+                (packet, parameters) => packet.PacketSize > 624 &&
+                    IncludeBytes(packet.Data.Skip(588).Take(36).ToArray(), retainerBytes));
             //=================
             RegisterPacketWizard("PlayerSpawn", "Please enter your world ID and wait for another player to spawn in your vicinity:",
                 PacketDirection.Server, (packet, parameters) =>
