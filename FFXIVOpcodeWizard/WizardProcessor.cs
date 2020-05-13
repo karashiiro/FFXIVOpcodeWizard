@@ -1,13 +1,12 @@
-﻿using System;
+﻿using FFXIVOpcodeWizard.Models;
+using Sapphire.Common.Network;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using FFXIVOpcodeWizard.Models;
-using Sapphire.Common.Network;
 
 namespace FFXIVOpcodeWizard
-{ 
+{
     class WizardProcessor
     {
         private readonly Queue<PacketWizard> wizards = new Queue<PacketWizard>();
@@ -92,7 +91,7 @@ namespace FFXIVOpcodeWizard
                 PacketDirection.Client,
                 (packet, parameters) => IncludeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
             //=================
-            RegisterPacketWizard("Playtime", "Please quickly type /playtime.",
+            RegisterPacketWizard("Playtime", "Please go to an unpopulated area and type /playtime.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 40);
             //=================
@@ -155,7 +154,8 @@ namespace FFXIVOpcodeWizard
             byte[] retainerBytes = null;
             RegisterPacketWizard("RetainerInformation", "Please enter one of your retainers' names and then touch the Summoning Bell:",
                 PacketDirection.Server,
-                (packet, parameters) => {
+                (packet, parameters) =>
+                {
                     if (retainerBytes == null)
                     {
                         retainerBytes = Encoding.UTF8.GetBytes(parameters[0]);
@@ -205,8 +205,8 @@ namespace FFXIVOpcodeWizard
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 48 &&
                                BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData) == 0x150001 &&
-                               packet.Data[(int) Offsets.IpcData + 4] == 0x14 &&
-                               packet.Data[(int) Offsets.IpcData + 5] == 0x01);
+                               packet.Data[(int)Offsets.IpcData + 4] == 0x14 &&
+                               packet.Data[(int)Offsets.IpcData + 5] == 0x01);
             //=================
             RegisterPacketWizard("SomeDirectorUnk4", "Please cast your line and catch a fish.",
                 PacketDirection.Server,
@@ -247,14 +247,19 @@ namespace FFXIVOpcodeWizard
             //=================
             RegisterPacketWizard("ActorSetPos", "Please find an Aetheryte and teleport to Mist East.",
                 PacketDirection.Server,
-                (packet, _) => {
-                    if (packet.PacketSize != 56) return false;
+                (packet, _) =>
+                {
+                    /*if (packet.PacketSize != 56) return false;
 
                     var x = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 8);
                     var y = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 12);
                     var z = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 16);
 
-                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;
+                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;*/
+
+                    Console.WriteLine("{0}: {1}", packet.Opcode, Encoding.UTF8.GetString(packet.Data));
+
+                    return false;
                 }
             );
             //=================
@@ -326,7 +331,7 @@ namespace FFXIVOpcodeWizard
                 Console.WriteLine($"#{i}: {wizards.ElementAt(i).OpName}");
 
             Console.WriteLine();
-            
+
             // Game Version
             Console.WriteLine("Please enter the current game version: ");
             var gamePatch = Console.ReadLine();
@@ -363,7 +368,7 @@ namespace FFXIVOpcodeWizard
                         parameters[paramIndex] = thisParam;
                     }
                 }
-                
+
                 Console.WriteLine($"Scanning for {wizard.ScanDirection} packets... (Press Ctrl+C to skip)");
 
                 var opCode = PacketScanner.Scan(pq, wizard.PacketCheckerFunc, parameters, wizard.ScanDirection, out bool cancelled);
