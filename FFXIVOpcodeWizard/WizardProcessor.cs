@@ -256,8 +256,6 @@ namespace FFXIVOpcodeWizard
 
                     return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;*/
 
-                    Console.WriteLine("{0}: {1}", packet.Opcode, Encoding.UTF8.GetString(packet.Data));
-
                     return false;
                 }
             );
