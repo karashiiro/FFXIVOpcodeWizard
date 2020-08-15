@@ -221,7 +221,7 @@ namespace FFXIVOpcodeWizard
                 (packet, _) => packet.PacketSize == 96 &&
                                BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x10) == 2587);
             //=================
-            RegisterPacketWizard("UseMooch", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
+            RegisterPacketWizard("InventoryTransaction", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 80 &&
                                BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 0x18) == 2587);
