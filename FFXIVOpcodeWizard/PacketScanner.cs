@@ -18,7 +18,7 @@ namespace FFXIVOpcodeWizard
             {
                 PacketSize = BitConverter.ToUInt32(basePacket.Data, (int)Offsets.PacketSize),
                 SegmentType = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.SegmentType),
-                Opcode = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.IpcType)
+                Opcode = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.IpcType),
             };
 
             return mp;

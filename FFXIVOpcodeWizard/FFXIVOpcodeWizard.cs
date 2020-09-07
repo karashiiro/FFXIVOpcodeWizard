@@ -9,59 +9,59 @@ namespace FFXIVOpcodeWizard
     {
         Global,
         KR,
-        CN
+        CN,
     }
 
-    class FFXIVOpcodeWizard
+    public static class FFXIVOpcodeWizard
     {
         static LinkedList<Packet> pq;
 
-        static bool ReadYes()
+        private static bool ReadYes()
         {
-            return Console.ReadLine().ToLower().StartsWith("y");
+            return Console.ReadLine()?.ToLower().StartsWith("y") ?? false;
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // Packet queue
             pq = new LinkedList<Packet>();
 
             // Get game region
             Console.WriteLine("Are you using the Chinese game client? [y/N]");
-            Region region = ReadYes() ? Region.CN : Region.Global;
+            var region = ReadYes() ? Region.CN : Region.Global;
 
-            Console.WriteLine("Use WinPcap instead of RawSocket? [y/N]");
-            TCPNetworkMonitor.NetworkMonitorType MonitorType = ReadYes() 
+            Console.WriteLine("Use WinPCap instead of RawSocket (requires admin)? [y/N]");
+            var monitorType = ReadYes() 
                 ? TCPNetworkMonitor.NetworkMonitorType.WinPCap
                 : TCPNetworkMonitor.NetworkMonitorType.RawSocket;
 
             // Initialize Machina
-            FFXIVNetworkMonitor monitor = new FFXIVNetworkMonitor
+            var monitor = new FFXIVNetworkMonitor
             {
                 MessageReceived = OnMessageReceived,
                 MessageSent = OnMessageSent,
-                MonitorType = MonitorType,
-                Region = region
+                MonitorType = monitorType,
+                Region = region,
             };
             monitor.Start();
 
-            var wizardProcessor = new WizardProcessor();
+            var scannerRegistry = new ScannerRegistry();
 
             // Run packet ID stuff
-            wizardProcessor.Run(pq);
+            scannerRegistry.Run(pq);
         }
 
-        static void OnMessageReceived(string connection, long epoch, byte[] data)
+        private static void OnMessageReceived(string connection, long epoch, byte[] data)
         {
             OnMessage(connection, epoch, data, PacketDirection.Server);
         }
 
-        static void OnMessageSent(string connection, long epoch, byte[] data)
+        private static void OnMessageSent(string connection, long epoch, byte[] data)
         {
             OnMessage(connection, epoch, data, PacketDirection.Client);
         }
 
-        static void OnMessage(string connection, long epoch, byte[] data, PacketDirection direction)
+        private static void OnMessage(string connection, long epoch, byte[] data, PacketDirection direction)
         {
             pq.AddLast(new Packet(connection, epoch, data, direction));
         }

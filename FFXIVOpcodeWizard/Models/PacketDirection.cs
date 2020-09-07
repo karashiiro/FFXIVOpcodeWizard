@@ -3,6 +3,6 @@
     enum PacketDirection
     {
         Server,
-        Client
+        Client,
     }
 }

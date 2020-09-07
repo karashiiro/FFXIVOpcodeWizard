@@ -10,6 +10,6 @@
         IpcType = 0x12,
         ServerId = 0x16,
         Timestamp = 0x18,
-        IpcData = 0x20
+        IpcData = 0x20,
     }
 }

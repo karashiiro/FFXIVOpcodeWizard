@@ -7,21 +7,21 @@ using System.Text;
 
 namespace FFXIVOpcodeWizard
 {
-    class WizardProcessor
+    class ScannerRegistry
     {
         private readonly Queue<PacketWizard> wizards = new Queue<PacketWizard>();
 
-        public WizardProcessor()
+        public ScannerRegistry()
         {
             Setup();
         }
 
-        private bool IncludeBytes(byte[] target, byte[] search)
+        private static bool IncludeBytes(byte[] target, byte[] search)
         {
-            for (int i = 0; i < target.Length - search.Length; ++i)
+            for (var i = 0; i < target.Length - search.Length; ++i)
             {
-                bool result = true;
-                for (int j = 0; j < search.Length; ++j)
+                var result = true;
+                for (var j = 0; j < search.Length; ++j)
                 {
                     if (search[j] != target[i + j])
                     {
@@ -47,7 +47,7 @@ namespace FFXIVOpcodeWizard
                 (packet, parameters) => packet.PacketSize > 300 && IncludeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
 
             //=================
-            int maxHP = 0;
+            var maxHP = 0;
             RegisterPacketWizard("UpdateHpMpTp", "Enter your max HP, then alter your HP or MP and allow your stats to regenerate completely:",
                 PacketDirection.Server,
                 (packet, parameters) =>
@@ -117,7 +117,7 @@ namespace FFXIVOpcodeWizard
                 PacketDirection.Server,
                 (packet, parameters) => packet.PacketSize == 1016 && IncludeBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), 1);
             //=================
-            int marketBoardItemDetectionId = 17837;
+            var marketBoardItemDetectionId = 17837;
             RegisterPacketWizard("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 208 &&
@@ -315,13 +315,13 @@ namespace FFXIVOpcodeWizard
                 Tutorial = tutorial,
                 PacketCheckerFunc = del,
                 ParamCount = paramCount,
-                ScanDirection = scanDirection
+                ScanDirection = scanDirection,
             });
         }
 
         public void Run(LinkedList<Packet> pq)
         {
-            StringBuilder output = new StringBuilder();
+            var output = new StringBuilder();
 
             Console.WriteLine("The following packets are to be scanned:");
             for (var i = 0; i < wizards.Count; i++)
@@ -368,7 +368,7 @@ namespace FFXIVOpcodeWizard
 
                 Console.WriteLine($"Scanning for {wizard.ScanDirection} packets... (Press Ctrl+C to skip)");
 
-                var opCode = PacketScanner.Scan(pq, wizard.PacketCheckerFunc, parameters, wizard.ScanDirection, out bool cancelled);
+                var opCode = PacketScanner.Scan(pq, wizard.PacketCheckerFunc, parameters, wizard.ScanDirection, out var cancelled);
                 if (cancelled)
                 {
                     Console.WriteLine($"{wizard.OpName} scanning skipped");
