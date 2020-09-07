@@ -121,7 +121,7 @@ namespace FFXIVOpcodeWizard
             RegisterPacketWizard("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 208 &&
-                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 56) == marketBoardItemDetectionId);
+                           BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 48) == marketBoardItemDetectionId);
             RegisterPacketWizard("MarketBoardItemListingCount", "Please open the market board listings for Grade 7 Dark Matter.",
                 PacketDirection.Server,
                 (packet, _) => packet.PacketSize == 48 &&
