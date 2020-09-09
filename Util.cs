@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 
 namespace FFXIVOpcodeWizard
 {
@@ -15,6 +16,11 @@ namespace FFXIVOpcodeWizard
             };
 
             return !string.IsNullOrEmpty(formatString) ? $"0x{input.ToString(formatString)}" : input.ToString();
+        }
+
+        public static bool Elevated()
+        {
+            return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }

@@ -26,6 +26,17 @@ namespace FFXIVOpcodeWizard.Models
             }
         }
 
+        private bool isEnabled = true;
+        public bool IsEnabled
+        {
+            get => this.isEnabled;
+            set
+            {
+                this.isEnabled = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
         public Action<RadioItem> PropertyChanged { get; set; }
     }
 }

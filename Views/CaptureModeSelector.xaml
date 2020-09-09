@@ -15,7 +15,8 @@
                             <Grid>
                                 <RadioButton GroupName="CaptureMode"
                                              Content="{Binding Text}"
-                                             IsChecked="{Binding IsChecked, Mode=TwoWay}" />
+                                             IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                             IsEnabled="{Binding IsEnabled}"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
