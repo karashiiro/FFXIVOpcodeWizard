@@ -1,0 +1,69 @@
+﻿<adonisControls:AdonisWindow x:Class="FFXIVOpcodeWizard.MainWindow"
+                             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                             xmlns:local="clr-namespace:FFXIVOpcodeWizard"
+                             xmlns:views = "clr-namespace:FFXIVOpcodeWizard.Views"
+                             xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                             xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                             mc:Ignorable="d"
+                             Title="FFXIV Opcode Wizard" Height="600" Width="1000"
+                             TitleBarBackground="DeepSkyBlue">
+    <Grid>
+        <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,0,-177.578,0">
+            <Button x:Name="RunButton" Click="RunButton_Click" Width="92.666">
+                <WrapPanel>
+                    <iconPacks:PackIconMaterial Kind="Cached"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                    <TextBlock Text=" Run" FontSize="14" VerticalAlignment="Center" />
+                </WrapPanel>
+            </Button>
+            <Button x:Name="StopButton" Click="StopButton_Click" IsEnabled="False" Width="92.666">
+                <WrapPanel>
+                    <iconPacks:PackIconMaterial Kind="StopCircleOutline"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                    <TextBlock Text=" Stop" FontSize="14" VerticalAlignment="Center" />
+                </WrapPanel>
+            </Button>
+            <Button x:Name="SkipButton" Click="SkipButton_Click" IsEnabled="False">
+                <WrapPanel>
+                    <iconPacks:PackIconMaterial Kind="SkipNextCircleOutline"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                    <TextBlock Text=" Skip" FontSize="14" VerticalAlignment="Center" />
+                </WrapPanel>
+            </Button>
+        </DockPanel>
+        <views:ScannerList x:Name="Registry" Loaded="Registry_Loaded" HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,28,-177.578,0" />
+
+        <DockPanel Margin="282.578,0,0,0" LastChildFill="False">
+            <views:ResultsPanel x:Name="ResultsPanel" Loaded="ResultsPanel_OnLoaded" DockPanel.Dock="Right" Width="278" />
+            <StackPanel DockPanel.Dock="Top">
+                <DockPanel>
+                    <TextBlock Text="Packet name: " VerticalAlignment="Center" />
+                    <TextBlock x:Name="PacketNameField" VerticalAlignment="Center" />
+                </DockPanel>
+                <DockPanel>
+                    <TextBlock Text="Opcode: " VerticalAlignment="Center" />
+                    <TextBlock x:Name="OpcodeField" VerticalAlignment="Center" />
+                </DockPanel>
+                <DockPanel>
+                    <TextBlock Text="Packet source: " VerticalAlignment="Center" />
+                    <TextBlock x:Name="PacketSourceField" VerticalAlignment="Center" />
+                </DockPanel>
+                <DockPanel>
+                    <TextBlock x:Name="TutorialField" FontSize="18" TextWrapping="Wrap" VerticalAlignment="Center" />
+                </DockPanel>
+            </StackPanel>
+            <DockPanel Height="200" DockPanel.Dock="Bottom">
+                <views:RegionSelector x:Name="RegionSelector" Loaded="RegionSelector_Loaded" Margin="5" />
+                <views:CaptureModeSelector x:Name="CaptureModeSelector" Loaded="CaptureModeSelector_Loaded" Margin="5" />
+                <views:NumberFormatSelector x:Name="NumberFormatSelector" Loaded="NumberFormatSelector_Loaded" Margin="5" />
+            </DockPanel>
+        </DockPanel>
+    </Grid>
+</adonisControls:AdonisWindow>

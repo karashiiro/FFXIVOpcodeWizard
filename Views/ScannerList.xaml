@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="FFXIVOpcodeWizard.Views.ScannerList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FFXIVOpcodeWizard.Views"
+             mc:Ignorable="d" >
+    <Grid>
+        <ListBox ItemsSource="{Binding Scanners}" SelectedItem="{Binding SelectedScanner}" SelectionChanged="Selector_OnSelectionChanged">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding PacketName}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

@@ -66,9 +66,9 @@ namespace FFXIVOpcodeWizard
 
         #endregion
 
-        private TCPNetworkMonitor _monitor = null;
-        private Dictionary<string, FFXIVBundleDecoder> _sentDecoders = new Dictionary<string, FFXIVBundleDecoder>();
-        private Dictionary<string, FFXIVBundleDecoder> _receivedDecoders = new Dictionary<string, FFXIVBundleDecoder>();
+        private TCPNetworkMonitor _monitor;
+        private readonly Dictionary<string, FFXIVBundleDecoder> _sentDecoders = new Dictionary<string, FFXIVBundleDecoder>();
+        private readonly Dictionary<string, FFXIVBundleDecoder> _receivedDecoders = new Dictionary<string, FFXIVBundleDecoder>();
 
         /// <summary>
         /// Validates the parameters and starts the monitor.
@@ -84,16 +84,18 @@ namespace FFXIVOpcodeWizard
             if (MessageReceived == null)
                 throw new ArgumentException("MessageReceived delegate must be specified.");
 
-            _monitor = new TCPNetworkMonitor();
-            _monitor.ProcessID = ProcessID;
-            if (_monitor.ProcessID == 0)
-                _monitor.WindowName = Region == Region.CN ? "最终幻想XIV" : "FINAL FANTASY XIV";
-            _monitor.MonitorType = MonitorType;
-            _monitor.LocalIP = LocalIP;
-            _monitor.UseSocketFilter = UseSocketFilter;
+            _monitor = new TCPNetworkMonitor
+            {
+                MonitorType = MonitorType,
+                LocalIP = LocalIP,
+                UseSocketFilter = UseSocketFilter,
+                DataSent = ProcessSentMessage,
+                DataReceived = ProcessReceivedMessage,
+                ProcessID = ProcessID,
+            };
 
-            _monitor.DataSent = (string connection, byte[] data) => ProcessSentMessage(connection, data);
-            _monitor.DataReceived = (string connection, byte[] data) => ProcessReceivedMessage(connection, data);
+            if (_monitor.ProcessID == 0)
+                _monitor.WindowName = Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV";
 
             _monitor.Start();
         }

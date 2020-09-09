@@ -1,6 +1,6 @@
 ﻿namespace FFXIVOpcodeWizard.Models
 {
-    enum PacketDirection
+    public enum PacketSource
     {
         Server,
         Client,
