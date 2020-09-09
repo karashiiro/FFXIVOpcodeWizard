@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="FFXIVOpcodeWizard.Views.ScannerList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+             mc:Ignorable="d" >
+    <Grid>
+        <ListBox ItemsSource="{Binding Scanners}" SelectedItem="{Binding SelectedScanner}" SelectionChanged="Selector_OnSelectionChanged">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Run this" Command="{Binding WpfRunOneCommand}" />
+                    <MenuItem Header="Run from here" Command="{Binding WpfRunFromHereCommand}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <iconPacks:PackIconMaterial Kind="CheckCircleOutline"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    Visibility="{Binding WpfOpcodeFound}" />
+                        <ContentControl ContentTemplate="{DynamicResource {x:Static adonisUi:Templates.LoadingCircle}}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Width="{adonisUi:Space 2}"
+                                        Height="{adonisUi:Space 2}"
+                                        Focusable="False"
+                                        Visibility="{Binding WpfRunning}"
+                                        Margin="-16,0,0,0" />
+                        <TextBlock Text="{Binding PacketName}" Margin="7,0,0,0" />
+                    </WrapPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
