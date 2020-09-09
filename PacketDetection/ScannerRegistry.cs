@@ -285,7 +285,19 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 2396 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 8) == 139);
         }
 
-        private void RegisterScanner(string packetName, string tutorial, PacketSource source, Func<MetaPacket, string[], bool> del, string[] paramPrompts = null)
+        /// <summary>
+        /// Adds a scanner to the scanner registry.
+        /// </summary>
+        /// <param name="packetName">The name (Sapphire-style) of the packet.</param>
+        /// <param name="tutorial">How the packet's conditions are created.</param>
+        /// <param name="source">Whether the packet originates on the client or the server.</param>
+        /// <param name="del">A boolean function that returns true if a packet matches the contained heuristics.</param>
+        /// <param name="paramPrompts">An array of requests for auxiliary data that will be passed into the detection delegate.</param>
+        private void RegisterScanner(string packetName,
+                                     string tutorial,
+                                     PacketSource source,
+                                     Func<MetaPacket, string[], bool> del,
+                                     string[] paramPrompts = null)
         {
             this.scanners.Add(new Scanner
             {
