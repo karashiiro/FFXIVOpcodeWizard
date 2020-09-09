@@ -132,7 +132,7 @@ namespace FFXIVOpcodeWizard
                 });
             //=================
             byte[] retainerBytes = null;
-            RegisterScanner("RetainerInformation", "Please use the Summoning Bell:",
+            RegisterScanner("RetainerInformation", "Please use the Summoning Bell.",
                 PacketSource.Server,
                 (packet, parameters) =>
                 {
@@ -140,12 +140,12 @@ namespace FFXIVOpcodeWizard
                     return packet.PacketSize == 112 && IncludesBytes(packet.Data.Skip(73).Take(32).ToArray(), retainerBytes);
                 }, new[] { "Please enter one of your retainers' names:" });
             //=================
-            RegisterScanner("NpcSpawn", "Please summon that retainer:",
+            RegisterScanner("NpcSpawn", "Please summon that retainer.",
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize > 624 &&
                     IncludesBytes(packet.Data.Skip(588).Take(36).ToArray(), retainerBytes));
             //=================
-            RegisterScanner("PlayerSpawn", "Please wait for another player to spawn in your vicinity:",
+            RegisterScanner("PlayerSpawn", "Please wait for another player to spawn in your vicinity.",
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
@@ -299,6 +299,8 @@ namespace FFXIVOpcodeWizard
 
         private static bool IncludesBytes(byte[] source, byte[] search)
         {
+            if (search == null) return false;
+
             for (var i = 0; i < source.Length - search.Length; ++i)
             {
                 var result = true;

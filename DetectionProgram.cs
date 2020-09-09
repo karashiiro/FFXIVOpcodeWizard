@@ -58,15 +58,27 @@ namespace FFXIVOpcodeWizard
 
                 if (paramCount > 0)
                 {
+                    var skip = false;
                     for (var paramIndex = 0; paramIndex < paramCount; paramIndex++)
                     {
                         var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
                         auxWindow.ShowDialog();
+                        if (auxWindow.Skipping)
+                        {
+                            skip = true;
+                            break;
+                        }
                         parameters[paramIndex] = auxWindow.ReturnValue ?? "";
                     }
+                    if (skip) continue;
                 }
 
-                await Task.Run(() => scanner.Opcode = this.scannerHost.Scan(pq, scanner.ScanDelegate, parameters, scanner.PacketSource, ref this.skipped));
+                try
+                {
+                    await Task.Run(() => scanner.Opcode = this.scannerHost.Scan(pq, scanner.ScanDelegate, parameters,
+                        scanner.PacketSource, ref this.skipped));
+                }
+                catch (FormatException) { }
 
                 if (this.stopped) return;
             }

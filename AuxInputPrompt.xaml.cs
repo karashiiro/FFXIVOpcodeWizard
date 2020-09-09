@@ -9,6 +9,8 @@ namespace FFXIVOpcodeWizard
     {
         public string ReturnValue { get; private set; }
 
+        public bool Skipping { get; private set; }
+
         public AuxInputPrompt(string tutorialText)
         {
             InitializeComponent();
@@ -19,6 +21,12 @@ namespace FFXIVOpcodeWizard
         private void ConfirmButton_Click(object sender, EventArgs e)
         {
             ReturnValue = ValueField.Text;
+            Close();
+        }
+
+        private void SkipButton_Click(object sender, EventArgs e)
+        {
+            Skipping = true;
             Close();
         }
     }

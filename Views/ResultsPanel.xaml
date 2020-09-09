@@ -7,13 +7,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TextBlock Text="Results" FontSize="18" />
+        <StackPanel>
+            <TextBlock Text="Results" FontSize="18" />
+            <DockPanel>
+                <TextBlock Text="Addendum: " VerticalAlignment="Center" />
+                <TextBox Text="{Binding Addendum, Mode=TwoWay}" />
+            </DockPanel>
+        </StackPanel>
         <TextBox Text="{Binding Contents}"
                  TextWrapping="Wrap"
                  AcceptsReturn="True"
                  VerticalScrollBarVisibility="Visible"
                  VerticalContentAlignment="Top"
-                 Margin="0,25,0,0"
+                 Margin="0,50,0,0"
                  IsReadOnly="True" />
     </Grid>
 </UserControl>

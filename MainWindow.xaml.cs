@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text;
 using System.Windows;
-using FFXIVOpcodeWizard.Models;
 using FFXIVOpcodeWizard.ViewModels;
 
 namespace FFXIVOpcodeWizard
@@ -18,8 +18,10 @@ namespace FFXIVOpcodeWizard
 
         private DetectionProgram detectionProgram;
 
-        private static string NumberToString(int input, NumberDisplayFormat format)
+        private string NumberToString(int input)
         {
+            var format = this.numberFormatSelectorViewModel.SelectedFormat;
+
             var formatString = format switch
             {
                 NumberDisplayFormat.Decimal => "",
@@ -53,7 +55,7 @@ namespace FFXIVOpcodeWizard
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
 
             PacketNameField.Text = scanner.PacketName;
-            OpcodeField.Text = NumberToString(scanner.Opcode, this.numberFormatSelectorViewModel.SelectedFormat);
+            OpcodeField.Text = NumberToString(scanner.Opcode);
             PacketSourceField.Text = scanner.PacketSource.ToString();
 
             var nextScannerIndex = this.scannerRegistryViewModel.Scanners.IndexOf(this.scannerRegistryViewModel.SelectedScanner) + 1;
@@ -89,7 +91,7 @@ namespace FFXIVOpcodeWizard
         private void NumberFormatSelectorViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
-            OpcodeField.Text = NumberToString(scanner.Opcode, this.numberFormatSelectorViewModel.SelectedFormat);
+            OpcodeField.Text = NumberToString(scanner.Opcode);
         }
 
         private void ResultsPanel_OnLoaded(object sender, RoutedEventArgs e)
@@ -116,7 +118,25 @@ namespace FFXIVOpcodeWizard
                 this.scannerRegistryViewModel.SelectedScanner =
                     this.scannerRegistryViewModel.Scanners[state.ScannerIndex];
                 TutorialField.Text = state.CurrentTutorial;
+
+                this.resultsPanelViewModel.Contents = BuildResults();
             });
+        }
+
+        private string BuildResults()
+        {
+            var sb = new StringBuilder();
+
+            var addendum = this.resultsPanelViewModel.Addendum;
+            foreach (var scanner in this.scannerRegistry.AsList())
+            {
+                if (scanner.Opcode != 0)
+                {
+                    sb.AppendLine($"{scanner.PacketName} = {NumberToString(scanner.Opcode)},{addendum}");
+                }
+            }
+
+            return sb.ToString();
         }
 
         private void StopButton_Click(object sender, EventArgs e)

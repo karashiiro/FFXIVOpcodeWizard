@@ -8,7 +8,10 @@
                              xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
                              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                              mc:Ignorable="d"
-                             Title="Auxiliary Input Prompt" Height="160" Width="300">
+                             Title="Auxiliary Input Prompt" Height="160" Width="300"
+                             TitleBarBackground="DeepSkyBlue"
+                             ResizeMode="NoResize"
+                             WindowStartupLocation="CenterScreen">
     <DockPanel Margin="10,10,10,10" LastChildFill="False">
         <DockPanel DockPanel.Dock="Top">
             <iconPacks:PackIconMaterial Kind="InformationOutline" VerticalAlignment="Center" Width="28" Height="28" />
@@ -17,7 +20,24 @@
         <DockPanel DockPanel.Dock="Bottom">
             <StackPanel>
                 <TextBox x:Name="ValueField" />
-                <Button Content="Confirm" Click="ConfirmButton_Click" Margin="0,5,0,0" />
+                <DockPanel>
+                    <Button  Click="ConfirmButton_Click" Margin="0,5,5,0" Width="135">
+                        <WrapPanel>
+                            <iconPacks:PackIconMaterial Kind="CheckCircleOutline"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                            <TextBlock Text=" Confirm" FontSize="14" VerticalAlignment="Center" />
+                        </WrapPanel>
+                    </Button>
+                    <Button Click="SkipButton_Click" Margin="0,5,0,0">
+                        <WrapPanel>
+                            <iconPacks:PackIconMaterial Kind="SkipNextCircleOutline"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                            <TextBlock Text=" Skip" FontSize="14" VerticalAlignment="Center" />
+                        </WrapPanel>
+                    </Button>
+                </DockPanel>
             </StackPanel>
         </DockPanel>
     </DockPanel>
