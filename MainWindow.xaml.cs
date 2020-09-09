@@ -54,46 +54,58 @@ namespace FFXIVOpcodeWizard
 
         private async Task RunDetectionProgram(int skipCount = 0)
         {
+            this.detectionProgram?.Abort();
+
             RunButton.IsEnabled = false;
             StopButton.IsEnabled = true;
 
-            this.detectionProgram?.Stop();
             this.detectionProgram = new DetectionProgram();
-            await detectionProgram.Run(
+            var aborted = await detectionProgram.Run(
                 BuildDetectionProgramArgs(),
                 skipCount,
                 DetectionProgram_Update,
                 DetectionProgram_RequestParameter);
 
-            RunButton.IsEnabled = true;
-            StopButton.IsEnabled = false;
-            SkipButton.IsEnabled = false;
+            if (!aborted)
+            {
+                RunButton.IsEnabled = true;
+                StopButton.IsEnabled = false;
+                SkipButton.IsEnabled = false;
+            }
         }
 
         private async Task RunDetectionProgramOnSelected()
         {
+            this.detectionProgram?.Abort();
+
             RunButton.IsEnabled = false;
             StopButton.IsEnabled = true;
 
-            this.detectionProgram?.Stop();
             this.detectionProgram = new DetectionProgram();
-            await this.detectionProgram.RunOne(
+            var aborted = await this.detectionProgram.RunOne(
                 this.scannerRegistryViewModel.SelectedScanner,
                 BuildDetectionProgramArgs(),
-                DetectionProgram_Update,
+                DetectionProgram_UpdateOne,
                 DetectionProgram_RequestParameter);
 
-            RunButton.IsEnabled = true;
-            StopButton.IsEnabled = false;
-            SkipButton.IsEnabled = false;
+            if (!aborted)
+            {
+                RunButton.IsEnabled = true;
+                StopButton.IsEnabled = false;
+                SkipButton.IsEnabled = false;
+            }
         }
 
         private void DetectionProgram_Update(DetectionProgram.State state)
         {
             this.scannerRegistryViewModel.SelectedScanner =
                 this.scannerRegistryViewModel.Scanners[state.ScannerIndex];
-            TutorialField.Text = state.CurrentTutorial;
+            DetectionProgram_UpdateOne(state);
+        }
 
+        private void DetectionProgram_UpdateOne(DetectionProgram.State state)
+        {
+            TutorialField.Text = state.CurrentTutorial;
             this.resultsPanelViewModel.UpdateContents();
         }
 
@@ -114,7 +126,7 @@ namespace FFXIVOpcodeWizard
             PacketSourceField.Text = scanner.PacketSource.ToString();
 
             var nextScannerIndex = this.scannerRegistryViewModel.Scanners.IndexOf(this.scannerRegistryViewModel.SelectedScanner) + 1;
-            SkipButton.IsEnabled = StopButton.IsEnabled && nextScannerIndex != this.scannerRegistryViewModel.Scanners.Count;
+            SkipButton.IsEnabled = StopButton.IsEnabled;
         }
 
         private void NumberFormatSelectorViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -151,10 +163,17 @@ namespace FFXIVOpcodeWizard
         private void SkipButton_Click(object sender, EventArgs e)
         {
             var nextScannerIndex = this.scannerRegistryViewModel.Scanners.IndexOf(this.scannerRegistryViewModel.SelectedScanner) + 1;
-            this.scannerRegistryViewModel.SelectedScanner =
-                this.scannerRegistryViewModel.Scanners[nextScannerIndex];
+            if (nextScannerIndex == this.scannerRegistryViewModel.Scanners.Count)
+            {
+                StopButton_Click(null, null);
+            }
+            else
+            {
+                this.scannerRegistryViewModel.SelectedScanner =
+                    this.scannerRegistryViewModel.Scanners[nextScannerIndex];
 
-            this.detectionProgram.Skip();
+                this.detectionProgram.Skip();
+            }
         }
 
         #region Load Behaviors

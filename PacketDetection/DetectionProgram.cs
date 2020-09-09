@@ -23,6 +23,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             public string CurrentTutorial { get; set; }
         }
 
+        private bool aborted;
         private bool stopped;
         private bool skipped;
 
@@ -36,23 +37,27 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// <param name="onStateChanged">A callback function called each time a scan completes.</param>
         /// <param name="requestParameter">A function called when a parameter needs to be requested from the user.</param>
         /// <returns></returns>
-        public async Task Run(Args args,
-                              int skipCount,
-                              Action<State> onStateChanged,
-                              Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
+        public async Task<bool> Run(Args args,
+                                    int skipCount,
+                                    Action<State> onStateChanged,
+                                    Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
         {
+            this.aborted = false;
             this.stopped = false;
             this.skipped = false;
 
             this.pq = new LinkedList<Packet>();
             var scannerHost = new PacketScanner();
 
-            var state = new State();
+            var state = new State
+            {
+                ScannerIndex = skipCount,
+            };
 
             var monitor = BuildNetworkMonitor(args);
             monitor.Start();
 
-            var scanners = args.Registry.AsList().Skip(skipCount).ToList();
+            var scanners = args.Registry.AsList();
 
             for (; state.ScannerIndex < scanners.Count; state.ScannerIndex++)
             {
@@ -82,14 +87,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
                 scanner.Running = false;
 
-                if (this.stopped) return;
+                if (this.stopped) return this.aborted;
             }
+
+            return this.aborted;
         }
 
-        public async Task RunOne(Scanner scanner,
-                                 Args args,
-                                 Action<State> onStateChanged,
-                                 Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
+        public async Task<bool> RunOne(Scanner scanner,
+                                       Args args,
+                                       Action<State> onStateChanged,
+                                       Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
         {
             this.stopped = false;
             this.skipped = false;
@@ -119,19 +126,28 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 if (skip)
                 {
                     scanner.Running = false;
-                    return;
+                    return this.aborted;
                 };
             }
 
             await RunScanner(scanner, parameters, scannerHost);
 
             scanner.Running = false;
+
+            return this.aborted;
+        }
+
+        public void Abort()
+        {
+            this.aborted = true;
+            Skip();
+            Stop();
         }
 
         public void Stop()
         {
-            Skip();
             this.stopped = true;
+            Skip();
         }
 
         public void Skip()
@@ -150,14 +166,17 @@ namespace FFXIVOpcodeWizard.PacketDetection
             };
         }
 
-        private async Task RunScanner(Scanner scanner, string[] parameters, PacketScanner scannerHost)
+        private Task RunScanner(Scanner scanner, string[] parameters, PacketScanner scannerHost)
         {
-            try
+            return Task.Run(() =>
             {
-                await Task.Run(() => scanner.Opcode = scannerHost.Scan(this.pq, scanner.ScanDelegate, parameters,
-                    scanner.PacketSource, ref this.skipped));
-            }
-            catch (FormatException) { }
+                try
+                {
+                    scanner.Opcode = scannerHost.Scan(this.pq, scanner.ScanDelegate, parameters,
+                        scanner.PacketSource, ref this.skipped);
+                }
+                catch (FormatException) { }
+            });
         }
 
         private void RequestParameters(Scanner scanner, string[] parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
