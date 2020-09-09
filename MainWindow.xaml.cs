@@ -70,6 +70,24 @@ namespace FFXIVOpcodeWizard
             SkipButton.IsEnabled = false;
         }
 
+        private async Task RunDetectionProgramOnSelected()
+        {
+            RunButton.IsEnabled = false;
+            StopButton.IsEnabled = true;
+
+            this.detectionProgram?.Stop();
+            this.detectionProgram = new DetectionProgram();
+            await this.detectionProgram.RunOne(
+                this.scannerRegistryViewModel.SelectedScanner,
+                BuildDetectionProgramArgs(),
+                DetectionProgram_Update,
+                DetectionProgram_RequestParameter);
+
+            RunButton.IsEnabled = true;
+            StopButton.IsEnabled = false;
+            SkipButton.IsEnabled = false;
+        }
+
         private void DetectionProgram_Update(DetectionProgram.State state)
         {
             this.scannerRegistryViewModel.SelectedScanner =
@@ -86,37 +104,6 @@ namespace FFXIVOpcodeWizard
             return (auxWindow.ReturnValue, auxWindow.Skipping);
         }
 
-        private void Registry_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.scannerRegistryViewModel.RunOneCommand = async o =>
-            {
-                RunButton.IsEnabled = false;
-                StopButton.IsEnabled = true;
-
-                this.detectionProgram?.Stop();
-                this.detectionProgram = new DetectionProgram();
-                await this.detectionProgram.RunOne(
-                    this.scannerRegistryViewModel.SelectedScanner,
-                    BuildDetectionProgramArgs(),
-                    DetectionProgram_Update,
-                    DetectionProgram_RequestParameter);
-
-                RunButton.IsEnabled = true;
-                StopButton.IsEnabled = false;
-                SkipButton.IsEnabled = false;
-            };
-
-            this.scannerRegistryViewModel.RunFromHereCommand = async o =>
-            {
-                var scannerIndex = this.scannerRegistry.AsList().IndexOf(this.scannerRegistryViewModel.SelectedScanner);
-                await RunDetectionProgram(scannerIndex);
-            };
-
-            this.scannerRegistryViewModel.PropertyChanged += RegistryViewModel_PropertyChanged;
-
-            Registry.DataContext = this.scannerRegistryViewModel;
-        }
-
         private void RegistryViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
@@ -130,34 +117,11 @@ namespace FFXIVOpcodeWizard
             SkipButton.IsEnabled = StopButton.IsEnabled && nextScannerIndex != this.scannerRegistryViewModel.Scanners.Count;
         }
 
-        private void RegionSelector_Loaded(object sender, RoutedEventArgs e)
-        {
-            RegionSelector.DataContext = this.regionSelectorViewModel;
-        }
-
-        private void CaptureModeSelector_Loaded(object sender, RoutedEventArgs e)
-        {
-            CaptureModeSelector.DataContext = this.captureModeSelectorViewModel;
-        }
-
-        private void NumberFormatSelector_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.numberFormatSelectorViewModel.PropertyChanged += NumberFormatSelectorViewModel_PropertyChanged;
-
-            NumberFormatSelector.DataContext = this.numberFormatSelectorViewModel;
-        }
-
         private void NumberFormatSelectorViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
             var format = this.numberFormatSelectorViewModel.SelectedFormat;
             OpcodeField.Text = Util.NumberToString(scanner.Opcode, format);
-        }
-
-        private void ResultsPanel_Loaded(object sender, RoutedEventArgs e)
-        {
-            ResultsPanel.DataContext = this.resultsPanelViewModel;
-            this.resultsPanelViewModel.UpdateContents();
         }
 
         private void ResetButton_Click(object sender, EventArgs e)
@@ -190,5 +154,48 @@ namespace FFXIVOpcodeWizard
 
             this.detectionProgram.Skip();
         }
+
+        #region Load Behaviors
+        private void Registry_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.scannerRegistryViewModel.RunOneCommand = async o =>
+            {
+                await RunDetectionProgramOnSelected();
+            };
+
+            this.scannerRegistryViewModel.RunFromHereCommand = async o =>
+            {
+                var scannerIndex = this.scannerRegistry.AsList().IndexOf(this.scannerRegistryViewModel.SelectedScanner);
+                await RunDetectionProgram(scannerIndex);
+            };
+
+            this.scannerRegistryViewModel.PropertyChanged += RegistryViewModel_PropertyChanged;
+
+            Registry.DataContext = this.scannerRegistryViewModel;
+        }
+
+        private void RegionSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+            RegionSelector.DataContext = this.regionSelectorViewModel;
+        }
+
+        private void CaptureModeSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+            CaptureModeSelector.DataContext = this.captureModeSelectorViewModel;
+        }
+
+        private void NumberFormatSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.numberFormatSelectorViewModel.PropertyChanged += NumberFormatSelectorViewModel_PropertyChanged;
+
+            NumberFormatSelector.DataContext = this.numberFormatSelectorViewModel;
+        }
+
+        private void ResultsPanel_Loaded(object sender, RoutedEventArgs e)
+        {
+            ResultsPanel.DataContext = this.resultsPanelViewModel;
+            this.resultsPanelViewModel.UpdateContents();
+        }
+        #endregion
     }
 }
