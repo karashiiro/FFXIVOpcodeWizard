@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace FFXIVOpcodeWizard
+namespace FFXIVOpcodeWizard.PacketDetection
 {
     public class PacketScanner
     {

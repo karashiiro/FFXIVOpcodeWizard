@@ -1,4 +1,4 @@
-﻿namespace FFXIVOpcodeWizard.Models
+﻿namespace FFXIVOpcodeWizard.PacketDetection
 {
     public enum PacketSource
     {

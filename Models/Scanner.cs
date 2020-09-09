@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FFXIVOpcodeWizard.PacketDetection;
+using System;
 
 namespace FFXIVOpcodeWizard.Models
 {

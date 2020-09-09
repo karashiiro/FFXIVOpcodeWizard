@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Machina;
 using Machina.FFXIV;
 
-namespace FFXIVOpcodeWizard
+namespace FFXIVOpcodeWizard.PacketDetection
 {
     /// <summary>
     /// This is an edited version of Machina.FFXIV.FFXIVNetworkMonitor.

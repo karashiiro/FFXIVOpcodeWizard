@@ -1,4 +1,4 @@
-﻿namespace FFXIVOpcodeWizard
+﻿namespace FFXIVOpcodeWizard.PacketDetection
 {
     // https://github.com/SapphireServer/Sapphire/blob/master/src/common/Network/CommonNetwork.h
     public enum Offsets

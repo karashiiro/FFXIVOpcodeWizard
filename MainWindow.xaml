@@ -3,7 +3,6 @@
                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                             xmlns:local="clr-namespace:FFXIVOpcodeWizard"
                              xmlns:views = "clr-namespace:FFXIVOpcodeWizard.Views"
                              xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
                              xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
@@ -13,15 +12,23 @@
                              TitleBarBackground="DeepSkyBlue">
     <Grid>
         <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,0,-177.578,0">
-            <Button x:Name="RunButton" Click="RunButton_Click" Width="92.666">
+            <Button Click="ResetButton_Click" Width="69.5">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="Cached"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" />
+                    <TextBlock Text=" Reset" FontSize="14" VerticalAlignment="Center" />
+                </WrapPanel>
+            </Button>
+            <Button x:Name="RunButton" Click="RunButton_Click" Width="69.5">
+                <WrapPanel>
+                    <iconPacks:PackIconMaterial Kind="PlayCircleOutline"
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Center" />
                     <TextBlock Text=" Run" FontSize="14" VerticalAlignment="Center" />
                 </WrapPanel>
             </Button>
-            <Button x:Name="StopButton" Click="StopButton_Click" IsEnabled="False" Width="92.666">
+            <Button x:Name="StopButton" Click="StopButton_Click" IsEnabled="False" Width="69.5">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="StopCircleOutline"
                                                 VerticalAlignment="Center"

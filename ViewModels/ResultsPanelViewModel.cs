@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace FFXIVOpcodeWizard.ViewModels
@@ -16,20 +17,20 @@ namespace FFXIVOpcodeWizard.ViewModels
             }
         }
 
-        private string addendum;
-        public string Addendum
+        private string affix;
+        public string Affix
         {
-            get => this.addendum;
+            get => this.affix;
             set
             {
-                this.addendum = value;
+                this.affix = value;
                 OnPropertyChanged();
             }
         }
 
         public void Load()
         {
-            this.addendum = "";
+            this.affix = "";
             this.contents = "";
         }
 

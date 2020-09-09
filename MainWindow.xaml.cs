@@ -1,8 +1,9 @@
-﻿using System;
+﻿using FFXIVOpcodeWizard.PacketDetection;
+using FFXIVOpcodeWizard.ViewModels;
+using System;
 using System.ComponentModel;
 using System.Text;
 using System.Windows;
-using FFXIVOpcodeWizard.ViewModels;
 
 namespace FFXIVOpcodeWizard
 {
@@ -102,6 +103,14 @@ namespace FFXIVOpcodeWizard
             ResultsPanel.DataContext = this.resultsPanelViewModel;
         }
 
+        private void ResetButton_Click(object sender, EventArgs e)
+        {
+            foreach (var scanner in this.scannerRegistry.AsList())
+            {
+                scanner.Opcode = 0;
+            }
+        }
+
         private void RunButton_Click(object sender, EventArgs e)
         {
             RunButton.IsEnabled = false;
@@ -127,12 +136,12 @@ namespace FFXIVOpcodeWizard
         {
             var sb = new StringBuilder();
 
-            var addendum = this.resultsPanelViewModel.Addendum;
+            var affix = this.resultsPanelViewModel.Affix;
             foreach (var scanner in this.scannerRegistry.AsList())
             {
                 if (scanner.Opcode != 0)
                 {
-                    sb.AppendLine($"{scanner.PacketName} = {NumberToString(scanner.Opcode)},{addendum}");
+                    sb.AppendLine($"{scanner.PacketName} = {NumberToString(scanner.Opcode)},{affix}");
                 }
             }
 

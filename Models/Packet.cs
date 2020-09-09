@@ -1,4 +1,6 @@
-﻿namespace FFXIVOpcodeWizard.Models
+﻿using FFXIVOpcodeWizard.PacketDetection;
+
+namespace FFXIVOpcodeWizard.Models
 {
     public class Packet
     {

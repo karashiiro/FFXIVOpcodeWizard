@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using static Machina.TCPNetworkMonitor;
 
-namespace FFXIVOpcodeWizard
+namespace FFXIVOpcodeWizard.PacketDetection
 {
     public class DetectionProgram
     {

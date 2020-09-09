@@ -81,14 +81,14 @@
     <Compile Include="AuxInputPrompt.xaml.cs">
       <DependentUpon>AuxInputPrompt.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Common.cs" />
-    <Compile Include="DetectionProgram.cs" />
-    <Compile Include="FFXIVNetworkMonitor.cs" />
+    <Compile Include="PacketDetection\Offsets.cs" />
+    <Compile Include="PacketDetection\DetectionProgram.cs" />
+    <Compile Include="PacketDetection\FFXIVNetworkMonitor.cs" />
     <Compile Include="Models\RadioItem.cs" />
     <Compile Include="NumberDisplayFormat.cs" />
-    <Compile Include="PacketScanner.cs" />
+    <Compile Include="PacketDetection\PacketScanner.cs" />
     <Compile Include="Region.cs" />
-    <Compile Include="ScannerRegistry.cs" />
+    <Compile Include="PacketDetection\ScannerRegistry.cs" />
     <Compile Include="ViewModels\CaptureModeSelectorViewModel.cs" />
     <Compile Include="ViewModels\NumberFormatSelectorViewModel.cs" />
     <Compile Include="ViewModels\RegionSelectorViewModel.cs" />
@@ -149,7 +149,7 @@
   <ItemGroup>
     <Compile Include="Models\Packet.cs" />
     <Compile Include="Models\Scanner.cs" />
-    <Compile Include="PacketDirection.cs" />
+    <Compile Include="PacketDetection\PacketDirection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -179,5 +179,6 @@
   <ItemGroup>
     <Resource Include="application.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
