@@ -27,7 +27,14 @@ namespace FFXIVOpcodeWizard.PacketDetection
         private bool stopped;
         private bool skipped;
 
-        public async Task Run(Args args, Action<State> onStateChanged)
+        /// <summary>
+        /// Runs the detection program.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="onStateChanged">A callback function called each time a scan completes.</param>
+        /// <param name="requestParameter">A function called when a parameter needs to be requested from the user.</param>
+        /// <returns></returns>
+        public async Task Run(Args args, Action<State> onStateChanged, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
         {
             this.stopped = false;
             this.pq = new LinkedList<Packet>();
@@ -52,6 +59,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 var paramCount = scanner.ParameterPrompts.Length;
                 var parameters = new string[scanner.ParameterPrompts.Length];
 
+                scanner.Running = true;
                 state.CurrentTutorial = scanner.Tutorial;
 
                 onStateChanged(state);
@@ -61,16 +69,20 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     var skip = false;
                     for (var paramIndex = 0; paramIndex < paramCount; paramIndex++)
                     {
-                        var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
-                        auxWindow.ShowDialog();
-                        if (auxWindow.Skipping)
+                        var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
+                        if (skipRequested)
                         {
                             skip = true;
                             break;
                         }
-                        parameters[paramIndex] = auxWindow.ReturnValue ?? "";
+                        parameters[paramIndex] = parameter ?? "";
                     }
-                    if (skip) continue;
+
+                    if (skip)
+                    {
+                        scanner.Running = false;
+                        continue;
+                    };
                 }
 
                 try
@@ -79,6 +91,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
                         scanner.PacketSource, ref this.skipped));
                 }
                 catch (FormatException) { }
+
+                scanner.Running = false;
 
                 if (this.stopped) return;
             }

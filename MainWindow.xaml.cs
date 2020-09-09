@@ -129,6 +129,11 @@ namespace FFXIVOpcodeWizard
                 TutorialField.Text = state.CurrentTutorial;
 
                 this.resultsPanelViewModel.Contents = BuildResults();
+            }, (scanner, paramIndex) =>
+            {
+                var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
+                auxWindow.ShowDialog();
+                return (auxWindow.ReturnValue, auxWindow.Skipping);
             });
         }
 
