@@ -59,6 +59,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 var paramCount = scanner.ParameterPrompts.Length;
                 var parameters = new string[scanner.ParameterPrompts.Length];
 
+                scanner.Opcode = 0;
                 scanner.Running = true;
                 state.CurrentTutorial = scanner.Tutorial;
 

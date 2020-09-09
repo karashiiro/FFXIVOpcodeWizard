@@ -10,7 +10,7 @@
             <TextBlock Text="Results" FontSize="18" />
             <DockPanel>
                 <TextBlock Text="Affix: " VerticalAlignment="Center" DockPanel.Dock="Left" />
-                <TextBox Text="{Binding Affix, Mode=TwoWay}" />
+                <TextBox Text="{Binding Affix, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </DockPanel>
         </StackPanel>
         <TextBox Text="{Binding Contents}"

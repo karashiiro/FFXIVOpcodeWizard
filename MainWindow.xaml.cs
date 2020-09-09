@@ -2,7 +2,6 @@
 using FFXIVOpcodeWizard.ViewModels;
 using System;
 using System.ComponentModel;
-using System.Text;
 using System.Windows;
 
 namespace FFXIVOpcodeWizard
@@ -11,41 +10,39 @@ namespace FFXIVOpcodeWizard
     {
         private readonly ScannerRegistry scannerRegistry;
 
-        private ScannerRegistryViewModel scannerRegistryViewModel;
-        private RegionSelectorViewModel regionSelectorViewModel;
-        private CaptureModeSelectorViewModel captureModeSelectorViewModel;
-        private NumberFormatSelectorViewModel numberFormatSelectorViewModel;
-        private ResultsPanelViewModel resultsPanelViewModel;
+        private readonly ScannerRegistryViewModel scannerRegistryViewModel;
+        private readonly RegionSelectorViewModel regionSelectorViewModel;
+        private readonly CaptureModeSelectorViewModel captureModeSelectorViewModel;
+        private readonly NumberFormatSelectorViewModel numberFormatSelectorViewModel;
+        private readonly ResultsPanelViewModel resultsPanelViewModel;
 
         private DetectionProgram detectionProgram;
-
-        private string NumberToString(int input)
-        {
-            var format = this.numberFormatSelectorViewModel.SelectedFormat;
-
-            var formatString = format switch
-            {
-                NumberDisplayFormat.Decimal => "",
-                NumberDisplayFormat.HexadecimalUppercase => "X4",
-                NumberDisplayFormat.HexadecimalLowercase => "x4",
-                _ => throw new NotImplementedException(),
-            };
-
-            return !string.IsNullOrEmpty(formatString) ? $"0x{input.ToString(formatString)}" : input.ToString();
-        }
 
         public MainWindow()
         {
             InitializeComponent();
 
             this.scannerRegistry = new ScannerRegistry();
+            this.scannerRegistry.AsList()[0].Opcode = 0x74;
+
+            this.scannerRegistryViewModel = new ScannerRegistryViewModel();
+            this.scannerRegistryViewModel.Load(this.scannerRegistry);
+
+            this.regionSelectorViewModel = new RegionSelectorViewModel();
+            this.regionSelectorViewModel.Load();
+
+            this.captureModeSelectorViewModel = new CaptureModeSelectorViewModel();
+            this.captureModeSelectorViewModel.Load();
+
+            this.numberFormatSelectorViewModel = new NumberFormatSelectorViewModel();
+            this.numberFormatSelectorViewModel.Load();
+
+            this.resultsPanelViewModel = new ResultsPanelViewModel();
+            this.resultsPanelViewModel.Load(this.scannerRegistry, this.numberFormatSelectorViewModel);
         }
 
         private void Registry_Loaded(object sender, RoutedEventArgs e)
         {
-            this.scannerRegistryViewModel = new ScannerRegistryViewModel();
-            this.scannerRegistryViewModel.Load(this.scannerRegistry);
-
             this.scannerRegistryViewModel.PropertyChanged += RegistryViewModel_PropertyChanged;
 
             Registry.DataContext = this.scannerRegistryViewModel;
@@ -54,9 +51,10 @@ namespace FFXIVOpcodeWizard
         private void RegistryViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
+            var format = this.numberFormatSelectorViewModel.SelectedFormat;
 
             PacketNameField.Text = scanner.PacketName;
-            OpcodeField.Text = NumberToString(scanner.Opcode);
+            OpcodeField.Text = Util.NumberToString(scanner.Opcode, format);
             PacketSourceField.Text = scanner.PacketSource.ToString();
 
             var nextScannerIndex = this.scannerRegistryViewModel.Scanners.IndexOf(this.scannerRegistryViewModel.SelectedScanner) + 1;
@@ -65,25 +63,16 @@ namespace FFXIVOpcodeWizard
 
         private void RegionSelector_Loaded(object sender, RoutedEventArgs e)
         {
-            this.regionSelectorViewModel = new RegionSelectorViewModel();
-            this.regionSelectorViewModel.Load();
-
             RegionSelector.DataContext = this.regionSelectorViewModel;
         }
 
         private void CaptureModeSelector_Loaded(object sender, RoutedEventArgs e)
         {
-            this.captureModeSelectorViewModel = new CaptureModeSelectorViewModel();
-            this.captureModeSelectorViewModel.Load();
-
             CaptureModeSelector.DataContext = this.captureModeSelectorViewModel;
         }
 
         private void NumberFormatSelector_Loaded(object sender, RoutedEventArgs e)
         {
-            this.numberFormatSelectorViewModel = new NumberFormatSelectorViewModel();
-            this.numberFormatSelectorViewModel.Load();
-
             this.numberFormatSelectorViewModel.PropertyChanged += NumberFormatSelectorViewModel_PropertyChanged;
 
             NumberFormatSelector.DataContext = this.numberFormatSelectorViewModel;
@@ -92,15 +81,14 @@ namespace FFXIVOpcodeWizard
         private void NumberFormatSelectorViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
-            OpcodeField.Text = NumberToString(scanner.Opcode);
+            var format = this.numberFormatSelectorViewModel.SelectedFormat;
+            OpcodeField.Text = Util.NumberToString(scanner.Opcode, format);
         }
 
-        private void ResultsPanel_OnLoaded(object sender, RoutedEventArgs e)
+        private void ResultsPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            this.resultsPanelViewModel = new ResultsPanelViewModel();
-            this.resultsPanelViewModel.Load();
-
             ResultsPanel.DataContext = this.resultsPanelViewModel;
+            this.resultsPanelViewModel.UpdateContents();
         }
 
         private void ResetButton_Click(object sender, EventArgs e)
@@ -128,29 +116,13 @@ namespace FFXIVOpcodeWizard
                     this.scannerRegistryViewModel.Scanners[state.ScannerIndex];
                 TutorialField.Text = state.CurrentTutorial;
 
-                this.resultsPanelViewModel.Contents = BuildResults();
+                this.resultsPanelViewModel.UpdateContents();
             }, (scanner, paramIndex) =>
             {
                 var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
                 auxWindow.ShowDialog();
                 return (auxWindow.ReturnValue, auxWindow.Skipping);
             });
-        }
-
-        private string BuildResults()
-        {
-            var sb = new StringBuilder();
-
-            var affix = this.resultsPanelViewModel.Affix;
-            foreach (var scanner in this.scannerRegistry.AsList())
-            {
-                if (scanner.Opcode != 0)
-                {
-                    sb.AppendLine($"{scanner.PacketName} = {NumberToString(scanner.Opcode)},{affix}");
-                }
-            }
-
-            return sb.ToString();
         }
 
         private void StopButton_Click(object sender, EventArgs e)

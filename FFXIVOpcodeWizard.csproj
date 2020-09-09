@@ -92,6 +92,7 @@
     <Compile Include="PacketDetection\PacketScanner.cs" />
     <Compile Include="Region.cs" />
     <Compile Include="PacketDetection\ScannerRegistry.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="ViewModels\CaptureModeSelectorViewModel.cs" />
     <Compile Include="ViewModels\NumberFormatSelectorViewModel.cs" />
     <Compile Include="ViewModels\RegionSelectorViewModel.cs" />

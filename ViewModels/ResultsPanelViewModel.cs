@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
+using FFXIVOpcodeWizard.PacketDetection;
 
 namespace FFXIVOpcodeWizard.ViewModels
 {
@@ -25,13 +27,37 @@ namespace FFXIVOpcodeWizard.ViewModels
             {
                 this.affix = value;
                 OnPropertyChanged();
+                UpdateContents();
             }
         }
 
-        public void Load()
+        private ScannerRegistry registry;
+        private NumberFormatSelectorViewModel numberFormatSelector;
+
+        public void Load(ScannerRegistry registry, NumberFormatSelectorViewModel numberFormatSelector)
         {
+            this.registry = registry;
+            this.numberFormatSelector = numberFormatSelector;
+
             this.affix = "";
             this.contents = "";
+        }
+
+        public void UpdateContents()
+        {
+            var sb = new StringBuilder();
+
+            var format = this.numberFormatSelector.SelectedFormat;
+
+            foreach (var scanner in this.registry.AsList())
+            {
+                if (scanner.Opcode != 0)
+                {
+                    sb.AppendLine($"{scanner.PacketName} = {Util.NumberToString(scanner.Opcode, format)},{Affix}");
+                }
+            }
+
+            Contents = sb.ToString();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

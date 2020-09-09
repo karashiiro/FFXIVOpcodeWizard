@@ -48,7 +48,7 @@
         <views:ScannerList x:Name="Registry" Loaded="Registry_Loaded" HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,28,-177.578,0" />
 
         <DockPanel Margin="282.578,0,0,0" LastChildFill="False">
-            <views:ResultsPanel x:Name="ResultsPanel" Loaded="ResultsPanel_OnLoaded" DockPanel.Dock="Right" Width="278" />
+            <views:ResultsPanel x:Name="ResultsPanel" Loaded="ResultsPanel_Loaded" DockPanel.Dock="Right" Width="278" />
             <StackPanel DockPanel.Dock="Top">
                 <DockPanel>
                     <TextBlock Text="Packet name: " VerticalAlignment="Center" />
