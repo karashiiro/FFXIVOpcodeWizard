@@ -23,7 +23,6 @@ namespace FFXIVOpcodeWizard
             InitializeComponent();
 
             this.scannerRegistry = new ScannerRegistry();
-            this.scannerRegistry.AsList()[0].Opcode = 0x74;
 
             this.scannerRegistryViewModel = new ScannerRegistryViewModel();
             this.scannerRegistryViewModel.Load(this.scannerRegistry);
