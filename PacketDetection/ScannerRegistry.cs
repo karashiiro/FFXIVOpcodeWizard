@@ -227,15 +227,13 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) =>
                 {
-                    /*if (packet.PacketSize != 56) return false;
+                    if (packet.PacketSize != 56) return false;
 
                     var x = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 8);
                     var y = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 12);
                     var z = BitConverter.ToSingle(packet.Data, (int)Offsets.IpcData + 16);
 
-                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;*/
-
-                    return false;
+                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;
                 }
             );
             //=================
