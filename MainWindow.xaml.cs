@@ -144,6 +144,8 @@ namespace FFXIVOpcodeWizard
             SkipButton.IsEnabled = false;
 
             this.detectionProgram.Stop();
+
+            TutorialField.Text = "";
         }
 
         private void SkipButton_Click(object sender, EventArgs e)
