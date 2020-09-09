@@ -1,7 +1,9 @@
-﻿using FFXIVOpcodeWizard.PacketDetection;
+﻿using FFXIVOpcodeWizard.Models;
+using FFXIVOpcodeWizard.PacketDetection;
 using FFXIVOpcodeWizard.ViewModels;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FFXIVOpcodeWizard
@@ -40,8 +42,76 @@ namespace FFXIVOpcodeWizard
             this.resultsPanelViewModel.Load(this.scannerRegistry, this.numberFormatSelectorViewModel);
         }
 
+        private DetectionProgram.Args BuildDetectionProgramArgs()
+        {
+            return new DetectionProgram.Args
+            {
+                CaptureMode = this.captureModeSelectorViewModel.SelectedCaptureMode,
+                Region = this.regionSelectorViewModel.SelectedRegion,
+                Registry = this.scannerRegistry,
+            };
+        }
+
+        private async Task RunDetectionProgram(int skipCount = 0)
+        {
+            RunButton.IsEnabled = false;
+            StopButton.IsEnabled = true;
+
+            this.detectionProgram?.Stop();
+            this.detectionProgram = new DetectionProgram();
+            await detectionProgram.Run(
+                BuildDetectionProgramArgs(),
+                skipCount,
+                DetectionProgram_Update,
+                DetectionProgram_RequestParameter);
+
+            RunButton.IsEnabled = true;
+            StopButton.IsEnabled = false;
+            SkipButton.IsEnabled = false;
+        }
+
+        private void DetectionProgram_Update(DetectionProgram.State state)
+        {
+            this.scannerRegistryViewModel.SelectedScanner =
+                this.scannerRegistryViewModel.Scanners[state.ScannerIndex];
+            TutorialField.Text = state.CurrentTutorial;
+
+            this.resultsPanelViewModel.UpdateContents();
+        }
+
+        private (string, bool) DetectionProgram_RequestParameter(Scanner scanner, int paramIndex)
+        {
+            var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
+            auxWindow.ShowDialog();
+            return (auxWindow.ReturnValue, auxWindow.Skipping);
+        }
+
         private void Registry_Loaded(object sender, RoutedEventArgs e)
         {
+            this.scannerRegistryViewModel.RunOneCommand = async o =>
+            {
+                RunButton.IsEnabled = false;
+                StopButton.IsEnabled = true;
+
+                this.detectionProgram?.Stop();
+                this.detectionProgram = new DetectionProgram();
+                await this.detectionProgram.RunOne(
+                    this.scannerRegistryViewModel.SelectedScanner,
+                    BuildDetectionProgramArgs(),
+                    DetectionProgram_Update,
+                    DetectionProgram_RequestParameter);
+
+                RunButton.IsEnabled = true;
+                StopButton.IsEnabled = false;
+                SkipButton.IsEnabled = false;
+            };
+
+            this.scannerRegistryViewModel.RunFromHereCommand = async o =>
+            {
+                var scannerIndex = this.scannerRegistry.AsList().IndexOf(this.scannerRegistryViewModel.SelectedScanner);
+                await RunDetectionProgram(scannerIndex);
+            };
+
             this.scannerRegistryViewModel.PropertyChanged += RegistryViewModel_PropertyChanged;
 
             Registry.DataContext = this.scannerRegistryViewModel;
@@ -98,30 +168,9 @@ namespace FFXIVOpcodeWizard
             }
         }
 
-        private void RunButton_Click(object sender, EventArgs e)
+        private async void RunButton_Click(object sender, EventArgs e)
         {
-            RunButton.IsEnabled = false;
-            StopButton.IsEnabled = true;
-
-            this.detectionProgram = new DetectionProgram();
-            _ = detectionProgram.Run(new DetectionProgram.Args
-            {
-                CaptureMode = this.captureModeSelectorViewModel.SelectedCaptureMode,
-                Region = this.regionSelectorViewModel.SelectedRegion,
-                Registry = this.scannerRegistry,
-            }, state =>
-            {
-                this.scannerRegistryViewModel.SelectedScanner =
-                    this.scannerRegistryViewModel.Scanners[state.ScannerIndex];
-                TutorialField.Text = state.CurrentTutorial;
-
-                this.resultsPanelViewModel.UpdateContents();
-            }, (scanner, paramIndex) =>
-            {
-                var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
-                auxWindow.ShowDialog();
-                return (auxWindow.ReturnValue, auxWindow.Skipping);
-            });
+            await RunDetectionProgram();
         }
 
         private void StopButton_Click(object sender, EventArgs e)

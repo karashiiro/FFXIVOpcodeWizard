@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using static Machina.TCPNetworkMonitor;
@@ -22,41 +23,41 @@ namespace FFXIVOpcodeWizard.PacketDetection
             public string CurrentTutorial { get; set; }
         }
 
-        private LinkedList<Packet> pq;
-        private PacketScanner scannerHost;
         private bool stopped;
         private bool skipped;
+
+        private LinkedList<Packet> pq;
 
         /// <summary>
         /// Runs the detection program.
         /// </summary>
         /// <param name="args"></param>
+        /// <param name="skipCount"></param>
         /// <param name="onStateChanged">A callback function called each time a scan completes.</param>
         /// <param name="requestParameter">A function called when a parameter needs to be requested from the user.</param>
         /// <returns></returns>
-        public async Task Run(Args args, Action<State> onStateChanged, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
+        public async Task Run(Args args,
+                              int skipCount,
+                              Action<State> onStateChanged,
+                              Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
         {
             this.stopped = false;
+            this.skipped = false;
+
             this.pq = new LinkedList<Packet>();
-            this.scannerHost = new PacketScanner();
+            var scannerHost = new PacketScanner();
 
             var state = new State();
 
-            var monitor = new FFXIVNetworkMonitor
-            {
-                MessageReceived = OnMessageReceived,
-                MessageSent = OnMessageSent,
-                MonitorType = args.CaptureMode,
-                Region = args.Region,
-            };
+            var monitor = BuildNetworkMonitor(args);
             monitor.Start();
 
-            var scanners = args.Registry.AsList();
+            var scanners = args.Registry.AsList().Skip(skipCount).ToList();
 
             for (; state.ScannerIndex < scanners.Count; state.ScannerIndex++)
             {
                 var scanner = scanners[state.ScannerIndex];
-                var paramCount = scanner.ParameterPrompts.Length;
+                
                 var parameters = new string[scanner.ParameterPrompts.Length];
 
                 scanner.Opcode = 0;
@@ -65,19 +66,10 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
                 onStateChanged(state);
 
-                if (paramCount > 0)
+                if (parameters.Length > 0)
                 {
                     var skip = false;
-                    for (var paramIndex = 0; paramIndex < paramCount; paramIndex++)
-                    {
-                        var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
-                        if (skipRequested)
-                        {
-                            skip = true;
-                            break;
-                        }
-                        parameters[paramIndex] = parameter ?? "";
-                    }
+                    RequestParameters(scanner, parameters, requestParameter, ref skip);
 
                     if (skip)
                     {
@@ -86,17 +78,54 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     };
                 }
 
-                try
-                {
-                    await Task.Run(() => scanner.Opcode = this.scannerHost.Scan(pq, scanner.ScanDelegate, parameters,
-                        scanner.PacketSource, ref this.skipped));
-                }
-                catch (FormatException) { }
+                await RunScanner(scanner, parameters, scannerHost);
 
                 scanner.Running = false;
 
                 if (this.stopped) return;
             }
+        }
+
+        public async Task RunOne(Scanner scanner,
+                                 Args args,
+                                 Action<State> onStateChanged,
+                                 Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter)
+        {
+            this.stopped = false;
+            this.skipped = false;
+
+            this.pq = new LinkedList<Packet>();
+
+            var scannerHost = new PacketScanner();
+
+            var state = new State();
+
+            var monitor = BuildNetworkMonitor(args);
+            monitor.Start();
+
+            var parameters = new string[scanner.ParameterPrompts.Length];
+
+            scanner.Opcode = 0;
+            scanner.Running = true;
+            state.CurrentTutorial = scanner.Tutorial;
+
+            onStateChanged(state);
+
+            if (parameters.Length > 0)
+            {
+                var skip = false;
+                RequestParameters(scanner, parameters, requestParameter, ref skip);
+
+                if (skip)
+                {
+                    scanner.Running = false;
+                    return;
+                };
+            }
+
+            await RunScanner(scanner, parameters, scannerHost);
+
+            scanner.Running = false;
         }
 
         public void Stop()
@@ -108,6 +137,41 @@ namespace FFXIVOpcodeWizard.PacketDetection
         public void Skip()
         {
             this.skipped = true;
+        }
+
+        private FFXIVNetworkMonitor BuildNetworkMonitor(Args args)
+        {
+            return new FFXIVNetworkMonitor
+            {
+                MessageReceived = OnMessageReceived,
+                MessageSent = OnMessageSent,
+                MonitorType = args.CaptureMode,
+                Region = args.Region,
+            };
+        }
+
+        private async Task RunScanner(Scanner scanner, string[] parameters, PacketScanner scannerHost)
+        {
+            try
+            {
+                await Task.Run(() => scanner.Opcode = scannerHost.Scan(this.pq, scanner.ScanDelegate, parameters,
+                    scanner.PacketSource, ref this.skipped));
+            }
+            catch (FormatException) { }
+        }
+
+        private void RequestParameters(Scanner scanner, string[] parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
+        {
+            for (var paramIndex = 0; paramIndex < parameters.Length; paramIndex++)
+            {
+                var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
+                if (skipRequested)
+                {
+                    skip = true;
+                    break;
+                }
+                parameters[paramIndex] = parameter ?? "";
+            }
         }
 
         private void OnMessageReceived(string connection, long epoch, byte[] data)

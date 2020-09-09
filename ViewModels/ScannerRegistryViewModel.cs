@@ -1,8 +1,10 @@
-﻿using FFXIVOpcodeWizard.Models;
+﻿using System;
+using FFXIVOpcodeWizard.Models;
 using FFXIVOpcodeWizard.PacketDetection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace FFXIVOpcodeWizard.ViewModels
 {
@@ -20,6 +22,12 @@ namespace FFXIVOpcodeWizard.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public Action<object> RunOneCommand { get; set; }
+        public Action<object> RunFromHereCommand { get; set; }
+
+        public ICommand WpfRunOneCommand => new RelayCommand(RunOneCommand);
+        public ICommand WpfRunFromHereCommand => new RelayCommand(RunFromHereCommand);
 
         public void Load(ScannerRegistry source)
         {

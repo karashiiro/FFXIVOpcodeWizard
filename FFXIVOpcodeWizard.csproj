@@ -84,6 +84,7 @@
     <Compile Include="AuxInputPrompt.xaml.cs">
       <DependentUpon>AuxInputPrompt.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\RelayCommand.cs" />
     <Compile Include="PacketDetection\Offsets.cs" />
     <Compile Include="PacketDetection\DetectionProgram.cs" />
     <Compile Include="PacketDetection\FFXIVNetworkMonitor.cs" />

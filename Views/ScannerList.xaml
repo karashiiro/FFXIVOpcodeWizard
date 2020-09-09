@@ -8,6 +8,12 @@
              mc:Ignorable="d" >
     <Grid>
         <ListBox ItemsSource="{Binding Scanners}" SelectedItem="{Binding SelectedScanner}" SelectionChanged="Selector_OnSelectionChanged">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Run this" Command="{Binding WpfRunOneCommand}" />
+                    <MenuItem Header="Run from here" Command="{Binding WpfRunFromHereCommand}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <WrapPanel>
