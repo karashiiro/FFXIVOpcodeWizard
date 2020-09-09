@@ -2,12 +2,29 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace FFXIVOpcodeWizard.Models
 {
     public class Scanner : INotifyPropertyChanged
     {
-        public ushort Opcode { get; set; }
+        private ushort opcode;
+        public ushort Opcode
+        {
+            get => this.opcode;
+            set
+            {
+                this.opcode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WpfOpcodeFound));
+            }
+        }
+
+        public Visibility WpfOpcodeFound => this.opcode switch
+        {
+            0 => Visibility.Hidden,
+            _ => Visibility.Visible,
+        };
 
         private bool running;
         public bool Running
@@ -17,8 +34,15 @@ namespace FFXIVOpcodeWizard.Models
             {
                 this.running = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(WpfRunning));
             }
         }
+
+        public Visibility WpfRunning => this.running switch
+        {
+            true => Visibility.Visible,
+            false => Visibility.Hidden,
+        };
 
         public string PacketName { get; set; }
         public string Tutorial { get; set; }
