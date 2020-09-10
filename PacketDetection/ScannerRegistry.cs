@@ -237,6 +237,14 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
             );
             //=================
+            RegisterScanner("ObjectSpawn", "Please enter a furnished house.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 96 &&
+                               packet.Data[(int)Offsets.IpcData + 1] == 12 &&
+                               packet.Data[(int)Offsets.IpcData + 2] == 4 &&
+                               packet.Data[(int)Offsets.IpcData + 3] == 0 &&
+                               BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData + 12) == 0);
+            //=================
             RegisterScanner("ActorCast", "Switch to White Mage, and cast Glare.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, (int)Offsets.IpcData) == 16533);
