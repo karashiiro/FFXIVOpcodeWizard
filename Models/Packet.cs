@@ -10,10 +10,12 @@ namespace FFXIVOpcodeWizard.Models
         public PacketSource Source { get; set; }
     }
 
-    public class MetaPacket : Packet
+    public class IpcPacket : Packet
     {
         public uint PacketSize { get; set; }
         public ushort SegmentType { get; set; }
         public ushort Opcode { get; set; }
+        public uint SourceActor { get; set; }
+        public uint TargetActor { get; set; }
     }
 }

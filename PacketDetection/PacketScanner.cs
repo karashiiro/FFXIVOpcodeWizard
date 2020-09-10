@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace FFXIVOpcodeWizard.PacketDetection
 {
@@ -11,24 +10,26 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// <summary>
         /// Pull packets from the queue and do basic parsing on them.
         /// </summary>
-        private static MetaPacket ScanGeneric(Packet basePacket)
+        private static IpcPacket ScanGeneric(Packet basePacket)
         {
-            return new MetaPacket
+            return new IpcPacket
             {
                 Connection = basePacket.Connection,
                 Data = basePacket.Data,
                 Epoch = basePacket.Epoch,
                 Source = basePacket.Source,
-                PacketSize = BitConverter.ToUInt32(basePacket.Data, (int)Offsets.PacketSize),
-                SegmentType = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.SegmentType),
-                Opcode = BitConverter.ToUInt16(basePacket.Data, (int)Offsets.IpcType),
+                PacketSize = BitConverter.ToUInt32(basePacket.Data, Offsets.PacketSize),
+                SegmentType = BitConverter.ToUInt16(basePacket.Data, Offsets.SegmentType),
+                Opcode = BitConverter.ToUInt16(basePacket.Data, Offsets.IpcType),
+                SourceActor = BitConverter.ToUInt32(basePacket.Data, Offsets.SourceActor),
+                TargetActor = BitConverter.ToUInt32(basePacket.Data, Offsets.TargetActor),
             };
         }
 
         /// <summary>
         /// Returns the opcode of the first packet to meet the conditions outlined by del.
         /// </summary>
-        public static ushort Scan(Queue<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters, PacketSource source, ref bool skipped)
+        public static ushort Scan(Queue<Packet> pq, Func<IpcPacket, string[], bool> del, string[] parameters, PacketSource source, ref bool skipped)
         {
             while (!skipped)
             {

@@ -1,15 +1,15 @@
 ﻿namespace FFXIVOpcodeWizard.PacketDetection
 {
     // https://github.com/SapphireServer/Sapphire/blob/master/src/common/Network/CommonNetwork.h
-    public enum Offsets
+    public static class Offsets
     {
-        PacketSize = 0x00,
-        SourceActor = 0x04,
-        TargetActor = 0x08,
-        SegmentType = 0x0C,
-        IpcType = 0x12,
-        ServerId = 0x16,
-        Timestamp = 0x18,
-        IpcData = 0x20,
+        public const int PacketSize = 0x00;
+        public const int SourceActor = 0x04;
+        public const int TargetActor = 0x08;
+        public const int SegmentType = 0x0C;
+        public const int IpcType = 0x12;
+        public const int ServerId = 0x16;
+        public const int Timestamp = 0x18;
+        public const int IpcData = 0x20;
     }
 }
