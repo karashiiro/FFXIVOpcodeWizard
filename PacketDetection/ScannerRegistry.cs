@@ -96,7 +96,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             RegisterScanner("Examine", "Please examine that character's equipment.",
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize == 1016 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter a nearby character's name" });
+                new[] { "Please enter a nearby character's name:" });
             //=================
             const int marketBoardItemDetectionId = 17837;
             RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
@@ -149,6 +149,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
+            RegisterScanner("ActorFreeSpawn", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 40 && packet.SourceActor != packet.TargetActor);
             //=================
             RegisterScanner("ItemInfo", "Please teleport and open your chocobo saddlebag.",
                 PacketSource.Server,
