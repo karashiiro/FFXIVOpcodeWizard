@@ -28,27 +28,17 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// <summary>
         /// Returns the opcode of the first packet to meet the conditions outlined by del.
         /// </summary>
-        public ushort Scan(LinkedList<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters, PacketSource source, ref bool skipped)
+        public static ushort Scan(Queue<Packet> pq, Func<MetaPacket, string[], bool> del, string[] parameters, PacketSource source, ref bool skipped)
         {
             while (!skipped)
             {
-                while (pq.First == null)
-                {
-                    Thread.Sleep(2);
-                    if (skipped)
-                    {
-                        goto Cancelled;
-                    }
-                }
-
-                if (pq.First.Value.Source != source)
-                {
-                    pq.RemoveFirst();
+                if (pq.Count == 0)
                     continue;
-                }
+                var packet = pq.Dequeue();
+                if (packet == null || packet.Source != source)
+                    continue;
 
-                var foundPacket = ScanGeneric(pq.First.Value);
-                pq.RemoveFirst();
+                var foundPacket = ScanGeneric(packet);
 
                 Debug.Print($"{source} => {foundPacket.Opcode:x4} - Length: {foundPacket.Data.Length}");
 
@@ -58,7 +48,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
             }
 
-            Cancelled:
             skipped = false;
             return 0;
         }

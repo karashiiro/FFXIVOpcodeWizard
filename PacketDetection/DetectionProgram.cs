@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using static Machina.TCPNetworkMonitor;
@@ -27,7 +26,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
         private bool stopped;
         private bool skipped;
 
-        private LinkedList<Packet> pq;
+        private Queue<Packet> pq;
 
         /// <summary>
         /// Runs the detection program.
@@ -46,7 +45,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.stopped = false;
             this.skipped = false;
 
-            this.pq = new LinkedList<Packet>();
+            this.pq = new Queue<Packet>();
             var scannerHost = new PacketScanner();
 
             var state = new State
@@ -101,7 +100,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.stopped = false;
             this.skipped = false;
 
-            this.pq = new LinkedList<Packet>();
+            this.pq = new Queue<Packet>();
 
             var scannerHost = new PacketScanner();
 
@@ -172,7 +171,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             {
                 try
                 {
-                    scanner.Opcode = scannerHost.Scan(this.pq, scanner.ScanDelegate, parameters,
+                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner.ScanDelegate, parameters,
                         scanner.PacketSource, ref this.skipped);
                 }
                 catch (FormatException) { }
@@ -205,7 +204,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private void OnMessage(string connection, long epoch, byte[] data, PacketSource source)
         {
-            pq.AddLast(new Packet
+            pq.Enqueue(new Packet
             {
                 Connection = connection,
                 Data = data,
