@@ -37,6 +37,17 @@ namespace FFXIVOpcodeWizard.Models
             }
         }
 
+        private string tooltip;
+        public string Tooltip
+        {
+            get => this.tooltip;
+            set
+            {
+                this.tooltip = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
         public Action<RadioItem> PropertyChanged { get; set; }
     }
 }

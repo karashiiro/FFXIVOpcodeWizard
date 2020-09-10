@@ -17,7 +17,7 @@ namespace FFXIVOpcodeWizard.ViewModels
             CaptureModes = new ObservableCollection<RadioItem>
             {
                 new RadioItem { Text = "WinPCap", IsChecked = true },
-                new RadioItem { Text = "Sockets", IsEnabled = Util.Elevated() },
+                new RadioItem { Text = "Sockets", IsEnabled = Util.Elevated(), Tooltip = "Requires Administrator escalation" },
             };
         }
 

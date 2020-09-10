@@ -16,7 +16,9 @@
                                 <RadioButton GroupName="CaptureMode"
                                              Content="{Binding Text}"
                                              IsChecked="{Binding IsChecked, Mode=TwoWay}"
-                                             IsEnabled="{Binding IsEnabled}"/>
+                                             IsEnabled="{Binding IsEnabled}"
+                                             ToolTip="{Binding Tooltip}"
+                                             ToolTipService.ShowOnDisabled="True"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
