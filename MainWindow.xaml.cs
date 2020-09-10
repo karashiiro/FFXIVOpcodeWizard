@@ -125,7 +125,6 @@ namespace FFXIVOpcodeWizard
             OpcodeField.Text = Util.NumberToString(scanner.Opcode, format);
             PacketSourceField.Text = scanner.PacketSource.ToString();
 
-            var nextScannerIndex = this.scannerRegistryViewModel.Scanners.IndexOf(this.scannerRegistryViewModel.SelectedScanner) + 1;
             SkipButton.IsEnabled = StopButton.IsEnabled;
         }
 
@@ -134,6 +133,7 @@ namespace FFXIVOpcodeWizard
             var scanner = this.scannerRegistryViewModel.SelectedScanner;
             var format = this.numberFormatSelectorViewModel.SelectedFormat;
             OpcodeField.Text = Util.NumberToString(scanner.Opcode, format);
+            this.resultsPanelViewModel.UpdateContents();
         }
 
         private void ResetButton_Click(object sender, EventArgs e)

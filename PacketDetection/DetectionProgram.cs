@@ -115,8 +115,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             scanner.Running = true;
             state.CurrentTutorial = scanner.Tutorial;
 
-            onStateChanged(state);
-
             if (parameters.Length > 0)
             {
                 var skip = false;
@@ -130,6 +128,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
             }
 
             await RunScanner(scanner, parameters, scannerHost);
+
+            onStateChanged(state);
 
             scanner.Running = false;
 
