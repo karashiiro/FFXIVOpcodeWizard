@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>karashiiro</Authors>
-    <Version>2.2.0</Version>
+    <Version>2.3.0</Version>
     <ApplicationIcon>application.ico</ApplicationIcon>
     <Deterministic>true</Deterministic>
   </PropertyGroup>

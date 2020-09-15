@@ -292,6 +292,22 @@ namespace FFXIVOpcodeWizard.PacketDetection
             RegisterScanner("AoeEffect32", "Attack multiple enemies (>24) with Holy.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 2396 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 139);
+            //=================
+            RegisterScanner("MiniCactpotInit", "Start playing Mini Cactpot.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.Data.Length != Offsets.IpcData + 136) return false;
+
+                    var indexEnd = packet.Data[Offsets.IpcData + 8];
+                    var column = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12);
+                    var row = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16);
+                    var digit = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 20);
+                    return indexEnd == 18 &&
+                           column <= 2 &&
+                           row <= 2 &&
+                           digit <= 9;
+                });
         }
 
         /// <summary>

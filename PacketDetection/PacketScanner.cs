@@ -35,7 +35,11 @@ namespace FFXIVOpcodeWizard.PacketDetection
             {
                 if (pq.Count == 0)
                     continue;
-                var packet = pq.Dequeue();
+                Packet packet;
+                lock (pq)
+                {
+                    packet = pq.Dequeue();
+                }
                 if (packet == null || packet.Source != source)
                     continue;
 

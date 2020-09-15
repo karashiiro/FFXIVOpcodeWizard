@@ -206,13 +206,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private void OnMessage(string connection, long epoch, byte[] data, PacketSource source)
         {
-            pq.Enqueue(new Packet
+            lock(this.pq)
             {
-                Connection = connection,
-                Data = data,
-                Source = source,
-                Epoch = epoch,
-            });
+                this.pq.Enqueue(new Packet
+                {
+                    Connection = connection,
+                    Data = data,
+                    Source = source,
+                    Epoch = epoch,
+                });
+            }
         }
     }
 }
