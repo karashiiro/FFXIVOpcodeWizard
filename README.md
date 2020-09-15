@@ -4,4 +4,4 @@ An opcode detection and identification program for FFXIV. This doubles as a work
 ## Contributing
 Want to add a packet scanner? Just add a new `RegisterScanner` call to the scanner registry. The `//=================` dividers represent new conditions; scanners that rely on the behavior of previous scanners should be grouped with those scanners, without dividers. As an example, refer to the market board packets.
 
-For the foreseeable future, we use Sapphire's names convention for packet types. If you believe a packet name should be changed, please make that request on the [Sapphire repository](https://github.com/SapphireServer/Sapphire). If you have discovered a new packet, please submit it to both Sapphire's `develop` branch, and to this repository.
+For the foreseeable future, we use Sapphire's names for packet types. If you believe a packet name should be changed, please make that request on the [Sapphire repository](https://github.com/SapphireServer/Sapphire). If you have discovered a new packet, please submit it to both Sapphire's `develop` branch, and to this repository.
