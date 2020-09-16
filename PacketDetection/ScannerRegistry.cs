@@ -50,6 +50,14 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     packet.PacketSize == 256 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == maxHp &&
                     BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 28) == 10000); // MP equals 10000
             //=================
+            RegisterScanner("UpdatePositionHandler", "Please move your character.",
+                PacketSource.Client,
+                (packet, _) => packet.PacketSize == 56 &&
+                               packet.SourceActor == packet.TargetActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == 0 &&
+                               BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 8) != 0 &&
+                               BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
+            //=================
             RegisterScanner("ClientTrigger", "Please draw your weapon.",
                 PacketSource.Client,
                 (packet, _) =>
