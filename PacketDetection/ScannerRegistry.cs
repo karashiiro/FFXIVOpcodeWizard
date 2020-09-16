@@ -297,9 +297,19 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 return allInRange;
             });
             //=================
-            RegisterScanner("CFNotify", "Please queue for \"The Vault\" as an undersized party.", // CFNotifyPop
+            RegisterScanner("CFNotify", "Please enter the \"The Vault\" as an undersized party.", // CFNotifyPop
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 64 && packet.Data[Offsets.IpcData + 20] == 0x22);
+            //=================
+            RegisterScanner("UpdatePositionInstance", "Please move your character in an/the instance.",
+                PacketSource.Client,
+                (packet, _) => packet.PacketSize == 72 &&
+                               packet.SourceActor == packet.TargetActor &&
+                               BitConverter.ToUInt64(packet.Data, Offsets.IpcData) != 0 &&
+                               BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x08) != 0 &&
+                               BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x10) != 0 &&
+                               BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x18) != 0 &&
+                               BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
             //=================
             RegisterScanner("ActorSetPos", "Please find an Aetheryte and teleport to Mih Khetto's Amphitheatre.",
                 PacketSource.Server,
