@@ -1,8 +1,7 @@
-﻿using System;
+﻿using FFXIVOpcodeWizard.PacketDetection;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
-using FFXIVOpcodeWizard.PacketDetection;
 
 namespace FFXIVOpcodeWizard.ViewModels
 {
@@ -51,10 +50,16 @@ namespace FFXIVOpcodeWizard.ViewModels
 
             foreach (var scanner in this.registry.AsList())
             {
-                if (scanner.Opcode != 0)
+                if (scanner.Opcode == 0) continue;
+
+                sb.Append(scanner.PacketName).Append(" = ")
+                    .Append(Util.NumberToString(scanner.Opcode, format)).Append(",").Append(Affix);
+                if (scanner.Comment.Text != null)
                 {
-                    sb.AppendLine($"{scanner.PacketName} = {Util.NumberToString(scanner.Opcode, format)},{Affix}");
+                    sb.Append(" (").Append(scanner.Comment).Append(")");
                 }
+
+                sb.AppendLine();
             }
 
             Contents = sb.ToString();

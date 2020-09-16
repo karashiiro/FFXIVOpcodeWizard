@@ -20,6 +20,17 @@ namespace FFXIVOpcodeWizard.Models
             }
         }
 
+        private Comment comment;
+        public Comment Comment
+        {
+            get => this.comment;
+            set
+            {
+                this.comment = value;
+                OnPropertyChanged();
+            }
+        }
+
         public Visibility WpfOpcodeFound => this.opcode switch
         {
             0 => Visibility.Hidden,
@@ -46,7 +57,7 @@ namespace FFXIVOpcodeWizard.Models
 
         public string PacketName { get; set; }
         public string Tutorial { get; set; }
-        public Func<IpcPacket, string[], bool> ScanDelegate { get; set; }
+        public Func<IpcPacket, string[], Comment, bool> ScanDelegate { get; set; }
         public PacketSource PacketSource { get; set; }
         public string[] ParameterPrompts { get; set; }
 

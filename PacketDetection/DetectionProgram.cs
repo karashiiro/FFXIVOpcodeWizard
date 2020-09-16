@@ -173,8 +173,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             {
                 try
                 {
-                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner.ScanDelegate, parameters,
-                        scanner.PacketSource, ref this.skipped);
+                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner, parameters, ref this.skipped);
                 }
                 catch (FormatException) { }
             });

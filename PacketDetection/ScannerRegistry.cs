@@ -249,18 +249,19 @@ namespace FFXIVOpcodeWizard.PacketDetection
             uint inventoryModifyHandlerId = 0;
             RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
                 PacketSource.Client,
-                (packet, _) => {
+                (packet, _, comment) => {
                     var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
                     if (!match) return false;
 
                     inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+
+                    var baseOffset = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+                    comment.Text = $"Base offset: {Util.NumberToString(baseOffset, NumberDisplayFormat.HexadecimalUppercase)}";
                     return true;
                 });
-            //=================
             RegisterScanner("InventoryActionAck", "Please wait.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
-            //=================
             RegisterScanner("InventoryTransaction", "Please wait.",
                 PacketSource.Server,
                 (packet, _) => {
@@ -270,7 +271,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
                     return true;
                 });
-            //=================
             RegisterScanner("InventoryTransactionFinish", "Please wait.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
@@ -387,20 +387,33 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// <param name="source">Whether the packet originates on the client or the server.</param>
         /// <param name="del">A boolean function that returns true if a packet matches the contained heuristics.</param>
         /// <param name="paramPrompts">An array of requests for auxiliary data that will be passed into the detection delegate.</param>
-        private void RegisterScanner(string packetName,
-                                     string tutorial,
-                                     PacketSource source,
-                                     Func<IpcPacket, string[], bool> del,
-                                     string[] paramPrompts = null)
+        private void RegisterScanner(
+            string packetName,
+            string tutorial,
+            PacketSource source,
+            Func<IpcPacket, string[], Comment, bool> del,
+            string[] paramPrompts = null)
         {
             this.scanners.Add(new Scanner
             {
                 PacketName = packetName,
                 Tutorial = tutorial,
                 ScanDelegate = del,
+                Comment = new Comment(),
                 ParameterPrompts = paramPrompts ?? new string[] { },
                 PacketSource = source,
             });
+        }
+
+        private void RegisterScanner(
+            string packetName,
+            string tutorial,
+            PacketSource source,
+            Func<IpcPacket, string[], bool> del,
+            string[] paramPrompts = null)
+        {
+            bool Fn(IpcPacket a, string[] b, Comment c) => del(a, b);
+            RegisterScanner(packetName, tutorial, source, Fn, paramPrompts);
         }
 
         private static bool IncludesBytes(byte[] source, byte[] search)
