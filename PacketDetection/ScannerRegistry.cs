@@ -37,9 +37,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                         maxHp = int.Parse(parameters[0]);
                     }
 
-                    return packet.PacketSize == 48 &&
-                        BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == maxHp && // HP equals MaxHP
-                        BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) == 10000; // MP equals 10000
+                    if (packet.PacketSize != 40 && packet.PacketSize != 48) return false;
+
+                    var packetHP = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    var packetMP = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+
+                    return packetHP == maxHp && packetMP == 10000;
                 }, new[] { "Please enter your max HP:" });
             //=================
             RegisterScanner("PlayerStats", "Switch to another job, and then switch back.",
@@ -73,7 +76,17 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("Playtime", "Please type /playtime.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 40 && packet.SourceActor == packet.TargetActor);
+                (packet, parameters) => {
+                    if (packet.PacketSize != 40 || packet.SourceActor != packet.TargetActor) return false;
+
+                    var playtime = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData);
+
+                    var inputDays = int.Parse(parameters[0]);
+                    var packetDays = playtime / 60 / 24;
+
+                    // In case you played for 23:59:59
+                    return inputDays == packetDays || inputDays + 1 == packetDays;
+                }, new[] { "Type /playtime, and input the days you played:" });
             //=================
             byte[] searchBytes = null;
             RegisterScanner("SetSearchInfoHandler", "Please set that search comment in-game.",
@@ -98,11 +111,28 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, parameters) => packet.PacketSize == 1016 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
                 new[] { "Please enter a nearby character's name:" });
             //=================
-            const int marketBoardItemDetectionId = 17837;
+            const int marketBoardItemDetectionId = 17837; // Grade 7 Dark Matter
             RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 208 &&
-                           BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 48) == marketBoardItemDetectionId);
+                (packet, _) => {
+                    if (packet.PacketSize != 208) return false;
+
+                    for (int i = 0; i < 22; ++i)
+                    {
+                        var itemId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8 * i);
+                        if (itemId == 0)
+                        {
+                            break;
+                        }
+
+                        if (itemId == marketBoardItemDetectionId)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
             RegisterScanner("MarketBoardItemListingCount", "Please open the market board listings for Grade 7 Dark Matter.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 &&
@@ -115,6 +145,19 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize > 1552 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44) == marketBoardItemDetectionId);
+            //=================
+            RegisterScanner("ActorMove", "Please teleport to Limsa Lominsa Lower Decks and wait.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 48) return false;
+
+                    var x = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) / 65536 * 2000 - 1000;
+                    var y = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) / 65536 * 2000 - 1000;
+                    var z = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 12) / 65536 * 2000 - 1000;
+                    return Math.Abs(x + 85) < 15 && Math.Abs(z - 0) < 15 && Math.Abs(y - 19) < 2;
+                }
+            );
             //=================
             RegisterScanner("MarketTaxRates", "Please visit a retainer counter and request information about market tax rates.",
                 PacketSource.Server,
@@ -203,10 +246,34 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 96 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == 2587);
             //=================
-            RegisterScanner("InventoryTransaction", "Please catch a moochable 'Harbor Herring' from Mist using Pill Bug bait.",
+            uint inventoryModifyHandlerId = 0;
+            RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
+                PacketSource.Client,
+                (packet, _) => {
+                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
+                    if (!match) return false;
+
+                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    return true;
+                });
+            //=================
+            RegisterScanner("InventoryActionAck", "Please wait.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 80 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x18) == 2587);
+                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
+            //=================
+            RegisterScanner("InventoryTransaction", "Please wait.",
+                PacketSource.Server,
+                (packet, _) => {
+                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
+                    if (!match) return false;
+
+                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    return true;
+                });
+            //=================
+            RegisterScanner("InventoryTransactionFinish", "Please wait.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
             //=================
             RegisterScanner("CFPreferredRole", "Please wait, this may take some time...", PacketSource.Server, (packet, _) =>
             {
@@ -226,7 +293,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 64 && packet.Data[Offsets.IpcData + 20] == 0x22);
             //=================
-            RegisterScanner("ActorSetPos", "Please find an Aetheryte and teleport to Mist East.",
+            RegisterScanner("ActorSetPos", "Please find an Aetheryte and teleport to Mih Khetto's Amphitheatre.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -236,7 +303,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     var y = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 12);
                     var z = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 16);
 
-                    return Math.Abs(x - 85) < 15 && Math.Abs(z + 14) < 15 && Math.Abs(y - 18) < 2;
+                    return Math.Abs(x + 75) < 15 && Math.Abs(z + 140) < 15 && Math.Abs(y - 7) < 2;
                 }
             );
             //=================
@@ -258,7 +325,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("AddStatusEffect", "Please use Dia.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871);
+                (packet, _) => 
+                    packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871 || 
+                    packet.PacketSize == 120 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 1871);
             //=================
             RegisterScanner("StatusEffectList", "Please wait...",
                 PacketSource.Server,

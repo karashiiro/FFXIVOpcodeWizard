@@ -10,9 +10,19 @@
                              mc:Ignorable="d"
                              Title="FFXIV Opcode Wizard" Height="600" Width="1000"
                              TitleBarBackground="DeepSkyBlue">
-    <Grid>
-        <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,0,-177.578,0">
-            <Button Click="ResetButton_Click" Width="69.5">
+    <DockPanel>
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="300">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="26"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button Click="ResetButton_Click">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="Cached"
                                                 VerticalAlignment="Center"
@@ -20,7 +30,7 @@
                     <TextBlock Text=" Reset" FontSize="14" VerticalAlignment="Center" />
                 </WrapPanel>
             </Button>
-            <Button x:Name="RunButton" Click="RunButton_Click" Width="69.5">
+            <Button x:Name="RunButton" Click="RunButton_Click" Grid.Column="1">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="PlayCircleOutline"
                                                 VerticalAlignment="Center"
@@ -28,7 +38,7 @@
                     <TextBlock Text=" Run" FontSize="14" VerticalAlignment="Center" />
                 </WrapPanel>
             </Button>
-            <Button x:Name="StopButton" Click="StopButton_Click" IsEnabled="False" Width="69.5">
+            <Button x:Name="StopButton" Click="StopButton_Click" IsEnabled="False" Grid.Column="2">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="StopCircleOutline"
                                                 VerticalAlignment="Center"
@@ -36,7 +46,7 @@
                     <TextBlock Text=" Stop" FontSize="14" VerticalAlignment="Center" />
                 </WrapPanel>
             </Button>
-            <Button x:Name="SkipButton" Click="SkipButton_Click" IsEnabled="False">
+            <Button x:Name="SkipButton" Click="SkipButton_Click" IsEnabled="False" Grid.Column="3">
                 <WrapPanel>
                     <iconPacks:PackIconMaterial Kind="SkipNextCircleOutline"
                                                 VerticalAlignment="Center"
@@ -44,12 +54,21 @@
                     <TextBlock Text=" Skip" FontSize="14" VerticalAlignment="Center" />
                 </WrapPanel>
             </Button>
-        </DockPanel>
-        <views:ScannerList x:Name="Registry" Loaded="Registry_Loaded" HorizontalAlignment="Left" VerticalAlignment="Top" Width="278" Margin="0,28,-177.578,0" />
+            <views:ScannerList x:Name="Registry" Loaded="Registry_Loaded" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="4" />
+        </Grid>
+        <views:ResultsPanel x:Name="ResultsPanel" Loaded="ResultsPanel_Loaded" DockPanel.Dock="Right" Width="260" HorizontalAlignment="Right" />
 
-        <DockPanel Margin="282.578,0,0,0" LastChildFill="False">
-            <views:ResultsPanel x:Name="ResultsPanel" Loaded="ResultsPanel_Loaded" DockPanel.Dock="Right" Width="278" />
-            <StackPanel DockPanel.Dock="Top">
+        <Grid HorizontalAlignment="Stretch" Margin="6,6,6,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="200"/>
+            </Grid.RowDefinitions>
+            <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Stretch" Grid.ColumnSpan="3">
                 <DockPanel>
                     <TextBlock Text="Packet name: " VerticalAlignment="Center" />
                     <TextBlock x:Name="PacketNameField" VerticalAlignment="Center" />
@@ -66,11 +85,9 @@
                     <TextBlock x:Name="TutorialField" FontSize="18" TextWrapping="Wrap" VerticalAlignment="Center" />
                 </DockPanel>
             </StackPanel>
-            <DockPanel Height="200" DockPanel.Dock="Bottom">
-                <views:RegionSelector x:Name="RegionSelector" Loaded="RegionSelector_Loaded" Margin="5" />
-                <views:CaptureModeSelector x:Name="CaptureModeSelector" Loaded="CaptureModeSelector_Loaded" Margin="5" />
-                <views:NumberFormatSelector x:Name="NumberFormatSelector" Loaded="NumberFormatSelector_Loaded" Margin="5" />
-            </DockPanel>
-        </DockPanel>
-    </Grid>
+            <views:RegionSelector x:Name="RegionSelector" Loaded="RegionSelector_Loaded" Margin="5" Grid.Row="1" />
+            <views:CaptureModeSelector x:Name="CaptureModeSelector" Loaded="CaptureModeSelector_Loaded" Margin="5" Grid.Row="1" Grid.Column="1" />
+            <views:NumberFormatSelector x:Name="NumberFormatSelector" Loaded="NumberFormatSelector_Loaded" Margin="5" Grid.Row="1" Grid.Column="2" />
+        </Grid>
+    </DockPanel>
 </adonisControls:AdonisWindow>
