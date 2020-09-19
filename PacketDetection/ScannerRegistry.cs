@@ -39,16 +39,17 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
                     if (packet.PacketSize != 40 && packet.PacketSize != 48) return false;
 
-                    var packetHP = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
-                    var packetMP = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+                    var packetHp = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    var packetMp = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
 
-                    return packetHP == maxHp && packetMP == 10000;
+                    return packetHp == maxHp && packetMp == 10000;
                 }, new[] { "Please enter your max HP:" });
             //=================
             RegisterScanner("PlayerStats", "Switch to another job, and then switch back.",
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize == 256 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == maxHp &&
-                    BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 28) == 10000); // MP equals 10000
+                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 28) == 10000 && // MP equals 10000
+                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 36) == 10000);  // GP equals 10000
             //=================
             RegisterScanner("UpdatePositionHandler", "Please move your character.",
                 PacketSource.Client,
@@ -101,10 +102,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Client,
                 (packet, parameters) =>
                 {
-                    if (searchBytes == null)
-                    {
-                        searchBytes = Encoding.UTF8.GetBytes(parameters[0]);
-                    }
+                    searchBytes ??= Encoding.UTF8.GetBytes(parameters[0]);
                     return IncludesBytes(packet.Data, searchBytes);
                 }, new[] { "Please enter a somewhat lengthy search message here, before entering it in-game:" });
             RegisterScanner("UpdateSearchInfo", string.Empty,
