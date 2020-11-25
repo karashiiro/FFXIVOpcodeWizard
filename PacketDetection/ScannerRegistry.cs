@@ -221,11 +221,23 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     packet.PacketSize == 48 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), new[] { "Please enter the level of the job you can switch to:" });
             //=================
-            RegisterScanner("CurrencyCrystalInfo", "Please teleport to New Gridania.",
+            var lightningCrystals = -1;
+            RegisterScanner("ActorCast", "Please teleport to New Gridania.",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 64 &&
-                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == int.Parse(parameters[0]),
+                (packet, parameters) =>
+                {
+                    if (lightningCrystals == -1) lightningCrystals = int.Parse(parameters[0]);
+                    return packet.PacketSize == 64 &&
+                           BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 5;
+                },
                 new[] { "Please enter the number of Lightning Crystals you have:" });
+            RegisterScanner("CurrencyCrystalInfo", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 64 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) == 2001 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) == 10 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == 12);
             //=================
             RegisterScanner("InitZone", string.Empty, PacketSource.Server,
                 (packet, _) => packet.PacketSize == 128 &&
@@ -356,11 +368,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                packet.Data[Offsets.IpcData + 3] == 0 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) == 0);
             //=================
-            RegisterScanner("ActorCast", "Switch to White Mage, and cast Glare.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 16533);
-            //=================
-            RegisterScanner("Effect", "Wait for Glare-caused damage.",
+            RegisterScanner("Effect", "Switch to White Mage, and cast Glare on an enemy. Then wait for a damage tick.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
             //=================
