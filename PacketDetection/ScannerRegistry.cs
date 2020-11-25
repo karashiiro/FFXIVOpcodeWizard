@@ -79,9 +79,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 20) == 0 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == 0);
             //=================
+            RegisterScanner("ActorControlTarget", "Place marker 'A' on the ground.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 64 &&
+                               packet.Data[Offsets.IpcData] == 50 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == 0);
+            //=================
             RegisterScanner("ChatHandler", "Please /say your message in-game:",
                 PacketSource.Client,
-                (packet, parameters) => IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])), new[] { "Please enter a message to /say in-game:" });
+                (packet, parameters) => IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter a message to /say in-game:" });
             //=================
             RegisterScanner("Playtime", "Please type /playtime.",
                 PacketSource.Server,
@@ -356,12 +363,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     packet.Data[Offsets.IpcData] == 24 &&
                     packet.Data[Offsets.IpcData + 5] == 0 &&
                     packet.Data[Offsets.IpcData + 6] > 0);
-            //=================
-            RegisterScanner("ActorControlTarget", "Place marker 'A' on the ground.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                    BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 310 &&
-                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == 0);
             //=================
             RegisterScanner("AoeEffect8", "Attack multiple enemies with Holy.",
                 PacketSource.Server,
