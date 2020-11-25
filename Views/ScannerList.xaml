@@ -7,9 +7,11 @@
              xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
              mc:Ignorable="d" >
     <Grid>
-        <ListBox ItemsSource="{Binding Scanners}"
+        <ListBox MaxHeight="9000"
+                 ItemsSource="{Binding Scanners}"
                  SelectedItem="{Binding SelectedScanner}"
-                 SelectionChanged="Selector_OnSelectionChanged">
+                 SelectionChanged="Selector_OnSelectionChanged"
+                 VirtualizingStackPanel.VirtualizationMode="Recycling">
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Run this" Command="{Binding WpfRunOneCommand}" />
