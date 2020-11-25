@@ -238,10 +238,20 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) == 10 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == 12);
-            //=================
             RegisterScanner("InitZone", string.Empty, PacketSource.Server,
                 (packet, _) => packet.PacketSize == 128 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 132);
+            //=================
+            RegisterScanner("EffectResult", "Please use Sprint while at full HP and MP.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 120 &&
+                               packet.SourceActor == packet.TargetActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == packet.SourceActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) ==
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 16) == 10000 &&
+                               packet.Data[Offsets.IpcData + 21] > 0
+                ); // We don't actually check for the Sprint effect because this is enough, but we can if necessary in the future.
             //=================
             RegisterScanner("EventStart", "Please begin fishing and put your rod away immediately.",
                 PacketSource.Server,
