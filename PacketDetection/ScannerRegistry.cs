@@ -123,7 +123,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => {
                     if (packet.PacketSize != 208) return false;
 
-                    for (int i = 0; i < 22; ++i)
+                    for (var i = 0; i < 22; ++i)
                     {
                         var itemId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8 * i);
                         if (itemId == 0)
@@ -200,7 +200,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
             RegisterScanner("ActorFreeSpawn", string.Empty,
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 40 && packet.SourceActor != packet.TargetActor);
+                (packet, _) => packet.PacketSize == 40 &&
+                               packet.SourceActor == packet.TargetActor);
             //=================
             RegisterScanner("ItemInfo", "Please teleport and open your chocobo saddlebag.",
                 PacketSource.Server,
