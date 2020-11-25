@@ -384,11 +384,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 {
                     if (packet.Data.Length != Offsets.IpcData + 136) return false;
 
-                    var indexEnd = packet.Data[Offsets.IpcData + 8];
+                    var indexEnd = packet.Data[Offsets.IpcData + 7];
                     var column = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12);
                     var row = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16);
                     var digit = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 20);
-                    return indexEnd == 18 &&
+
+                    return indexEnd == 23 &&
                            column <= 2 &&
                            row <= 2 &&
                            digit <= 9;
