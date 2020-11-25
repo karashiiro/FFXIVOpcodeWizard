@@ -10,7 +10,7 @@ namespace FFXIVOpcodeWizard.ViewModels
 {
     public class ScannerRegistryViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Scanner> Scanners { get; set; }
+        public ReadOnlyObservableCollection<Scanner> Scanners { get; set; }
 
         private Scanner selectedScanner;
         public Scanner SelectedScanner
@@ -18,6 +18,7 @@ namespace FFXIVOpcodeWizard.ViewModels
             get => this.selectedScanner;
             set
             {
+                if (this.selectedScanner == value) return;
                 this.selectedScanner = value;
                 OnPropertyChanged();
             }
@@ -31,7 +32,8 @@ namespace FFXIVOpcodeWizard.ViewModels
 
         public void Load(ScannerRegistry source)
         {
-            Scanners = new ObservableCollection<Scanner>(source.AsList());
+            Scanners = new ReadOnlyObservableCollection<Scanner>(
+                new ObservableCollection<Scanner>(source.AsList()));
             this.selectedScanner = Scanners[0];
         }
 

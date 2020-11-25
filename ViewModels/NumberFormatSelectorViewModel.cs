@@ -15,7 +15,7 @@ namespace FFXIVOpcodeWizard.ViewModels
         public NumberDisplayFormat SelectedFormat
         {
             get => this.selectedFormat;
-            set
+            private set
             {
                 this.selectedFormat = value;
                 OnPropertyChanged();
