@@ -317,7 +317,24 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x18) != 0 &&
                                BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
             //=================
-            RegisterScanner("ActorSetPos", "Please find an Aetheryte and teleport to Mih Khetto's Amphitheatre.",
+            RegisterScanner("PrepareZoning", "Please find an Aetheryte and teleport to Mih Khetto's Amphitheatre.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 48) return false;
+
+                    var logMessage = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    var targetZone = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+                    var animation = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6);
+                    var fadeOutTime = packet.Data[Offsets.IpcData + 10];
+
+                    return logMessage == 0 &&
+                           targetZone == 133 &&
+                           animation == 112 &&
+                           fadeOutTime == 14 &&
+                           packet.SourceActor == packet.TargetActor;
+                });
+            RegisterScanner("ActorSetPos", string.Empty,
                 PacketSource.Server,
                 (packet, _) =>
                 {
