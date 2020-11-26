@@ -79,11 +79,13 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 20) == 0 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == 0);
             //=================
-            RegisterScanner("ActorControlTarget", "Place marker 'A' on the ground.",
+            RegisterScanner("ActorControlTarget", "Please mark 1 to self.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 64 &&
-                               packet.Data[Offsets.IpcData] == 50 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == 0);
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04) == 0 &&
+                               packet.SourceActor == packet.TargetActor &&
+                               packet.SourceActor == BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) &&
+                               packet.SourceActor == BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x18));
             //=================
             RegisterScanner("ChatHandler", "Please /say your message in-game:",
                 PacketSource.Client,
@@ -339,7 +341,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x18) != 0 &&
                                BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
             //=================
-            RegisterScanner("PrepareZoning", "Please find an Aetheryte and teleport to Mih Khetto's Amphitheatre.",
+            RegisterScanner("PrepareZoning", "Please find an Aetheryte and teleport to Lancers' Guild.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -356,7 +358,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            fadeOutTime == 14 &&
                            packet.SourceActor == packet.TargetActor;
                 });
-            RegisterScanner("ActorSetPos", string.Empty,
+            RegisterScanner("ActorSetPos", "Please teleport to Mih Khetto's Amphitheatre via the Aetheryte.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -370,6 +372,27 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
             );
             //=================
+            RegisterScanner("PlaceFieldMarker", "Please target the Aetheryte and type /waymark A <t>",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                    packet.SourceActor == packet.TargetActor &&
+                    BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 256 &&
+                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 7237);
+            //=================
+            RegisterScanner("PlaceFieldMarkerPreset", "Please type /waymark clear",
+                PacketSource.Server,
+                (packet, _) => 
+                {
+                    if (packet.PacketSize != 136 || packet.SourceActor != packet.TargetActor) return false;
+
+                    for (var i = 0; i < 24; i++)
+                    {
+                        if (BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04 + 4 * i) != 0) return false;
+                    }
+
+                    return true;
+                });
+            //=================
             RegisterScanner("ObjectSpawn", "Please enter a furnished house.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 96 &&
@@ -381,12 +404,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             RegisterScanner("Effect", "Switch to White Mage, and cast Glare on an enemy. Then wait for a damage tick.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
-            //=================
-            RegisterScanner("AddStatusEffect", "Please use Dia.",
-                PacketSource.Server,
-                (packet, _) => 
-                    packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871 || 
-                    packet.PacketSize == 120 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 1871);
             //=================
             RegisterScanner("StatusEffectList", "Please wait...",
                 PacketSource.Server,
