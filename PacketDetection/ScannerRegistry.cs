@@ -405,6 +405,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
             //=================
+            RegisterScanner("EffectResult", "Please use Dia.",
+                PacketSource.Server,
+                (packet, _) => 
+                    packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871 || 
+                    packet.PacketSize == 120 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 1871);
+            //=================
             RegisterScanner("StatusEffectList", "Please wait...",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 416 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 1871);
