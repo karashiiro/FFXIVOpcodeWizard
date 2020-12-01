@@ -79,7 +79,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 20) == 0 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == 0);
             //=================
-            RegisterScanner("ActorControlTarget", "Please mark 1 to self.",
+            RegisterScanner("ActorControlTarget", "Please mark yourself with the \"1\" marker.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 64 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04) == 0 &&
@@ -341,7 +341,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x18) != 0 &&
                                BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
             //=================
-            RegisterScanner("PrepareZoning", "Please find an Aetheryte and teleport to Lancers' Guild.",
+            RegisterScanner("PrepareZoning", "Please find an Aethernet Shard and teleport to Lancers' Guild.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -358,7 +358,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            fadeOutTime == 14 &&
                            packet.SourceActor == packet.TargetActor;
                 });
-            RegisterScanner("ActorSetPos", "Please teleport to Mih Khetto's Amphitheatre via the Aetheryte.",
+            //=================
+            RegisterScanner("ActorSetPos", "Please teleport to Mih Khetto's Amphitheatre via the Aethernet Shard.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -372,7 +373,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
             );
             //=================
-            RegisterScanner("PlaceFieldMarker", "Please target the Aetheryte and type /waymark A <t>",
+            RegisterScanner("PlaceFieldMarker", "Please target the Mih Khetto's Amphitheatre Aethernet Shard and type /waymark A <t>",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 &&
                     packet.SourceActor == packet.TargetActor &&
@@ -405,7 +406,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
             //=================
-            RegisterScanner("EffectResult", "Please use Dia.",
+            RegisterScanner("AddStatusEffect", "Please use Dia.",
                 PacketSource.Server,
                 (packet, _) => 
                     packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871 || 
