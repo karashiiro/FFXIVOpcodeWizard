@@ -286,7 +286,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("DesynthResult", "Please desynth a Merlthor Goby (can be found on marketboard for a couple gil).",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 32 &&
+                (packet, _) => packet.PacketSize == 68 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x12) % 1000000 == 5267);
             //=================
