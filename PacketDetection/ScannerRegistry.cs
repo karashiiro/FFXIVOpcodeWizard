@@ -284,6 +284,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 96 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == 2587);
             //=================
+            RegisterScanner("DesynthResult", "Please desynth a Merlthor Goby (can be found on marketboard for a couple gil).",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 32 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x12) % 1000000 == 5267);
+            //=================
             uint inventoryModifyHandlerId = 0;
             RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
                 PacketSource.Client,
