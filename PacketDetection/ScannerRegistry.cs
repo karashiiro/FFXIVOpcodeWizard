@@ -174,7 +174,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
             );
             //=================
-            RegisterScanner("MarketTaxRates", "Please visit a retainer counter and request information about market tax rates.",
+            RegisterScanner("ResultDialog", "Please visit a retainer counter and request information about market tax rates.",
                 PacketSource.Server,
                 (packet, _) =>
                 {
