@@ -160,6 +160,14 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize > 1552 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44) == marketBoardItemDetectionId);
+            RegisterScanner("MarketBoardPurchaseHandler", "Please purchase Grade 7 Dark Matter",
+                PacketSource.Client,
+                (packet, _) => packet.PacketSize == 72 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == marketBoardItemDetectionId);
+            RegisterScanner("MarketBoardPurchase", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == marketBoardItemDetectionId);
             //=================
             RegisterScanner("ActorMove", "Please teleport to Limsa Lominsa Lower Decks and wait.",
                 PacketSource.Server,
