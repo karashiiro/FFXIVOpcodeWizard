@@ -44,13 +44,16 @@ namespace FFXIVOpcodeWizard.ViewModels
 
         public void UpdateContents()
         {
-            var sb = new StringBuilder();
+            var serverSb = new StringBuilder();
+            var clientSb = new StringBuilder();
 
             var format = this.numberFormatSelector.SelectedFormat;
 
             foreach (var scanner in this.registry.AsList())
             {
                 if (scanner.Opcode == 0) continue;
+
+                var sb = scanner.PacketSource == PacketSource.Client ? clientSb : serverSb;
 
                 sb.Append(scanner.PacketName).Append(" = ")
                     .Append(Util.NumberToString(scanner.Opcode, format)).Append(",").Append(Affix);
@@ -62,7 +65,17 @@ namespace FFXIVOpcodeWizard.ViewModels
                 sb.AppendLine();
             }
 
-            Contents = sb.ToString();
+            var resultSb = new StringBuilder();
+            resultSb.Append("// Server Zone");
+            resultSb.AppendLine();
+            resultSb.Append(serverSb);
+            resultSb.AppendLine();
+            resultSb.Append("// Client Zone");
+            resultSb.AppendLine();
+            resultSb.Append(clientSb);
+            resultSb.AppendLine();
+
+            Contents = resultSb.ToString();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
