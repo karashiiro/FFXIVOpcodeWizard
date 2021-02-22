@@ -469,6 +469,43 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            row <= 2 &&
                            digit <= 9;
                 });
+            //=================
+            RegisterScanner("FreeCompanyInfo", "Load a zone.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == int.Parse(parameters[0]),
+                new[] { "Please enter your Free Company rank:" });
+            //=================
+            RegisterScanner("AirshipTimers", "Open your Estate tab from the Timers window if you have any airships on exploration.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter your airship name:" });
+            RegisterScanner("SubmarineTimers", "Open your Estate tab from the Timers window if you have any submarines on exploration.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter your submarine name:" });
+            RegisterScanner("AirshipStatusList", "Open your airship management console if you have any airships",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 192 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter your airship name:" });
+            RegisterScanner("AirshipStatus", "Check the status of a specific airship if you have any airships",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 104 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter your airship name:" });
+            RegisterScanner("AirshipExplorationResult", "Open a voyage log from an airship",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == int.Parse(parameters[0]),
+                new[] { "Please enter the experience from the first sector:" });
+            RegisterScanner("SubmarineProgressionStatus", "Open your submarine management console if you have any submarines",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1  && packet.Data[Offsets.IpcData] <= 4);
+            RegisterScanner("SubmarineStatusList", "Open your submarine management console if you have any submarines",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 272 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter your submarine name:" });
+            RegisterScanner("SubmarineExplorationResult", "Open a voyage log from a submarine",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == int.Parse(parameters[0]),
+                new[] { "Please enter the experience from the first sector:" });
         }
 
         /// <summary>
