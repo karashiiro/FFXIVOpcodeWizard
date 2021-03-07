@@ -506,6 +506,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == int.Parse(parameters[0]),
                 new[] { "Please enter the experience from the first sector:" });
+            //=================
+            RegisterScanner("HousingWardInfo", "Please view a housing ward from a city aetheryte/ferry.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 2440 &&
+                        IncludesBytes(new ArraySegment<byte>(packet.Data, Offsets.IpcData + 16, 32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter the name of whoever owns the first house in the ward (if it's an FC, their shortname):" });
         }
 
         /// <summary>
