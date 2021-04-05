@@ -220,7 +220,11 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 40 &&
                                packet.SourceActor == packet.TargetActor);
             //=================
-            RegisterScanner("ItemInfo", "Please teleport and open your chocobo saddlebag.",
+            RegisterScanner("ContainerInfo", "Please teleport and open your chocobo saddlebag.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 2001);
+            RegisterScanner("ItemInfo", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 96 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 4000);
