@@ -264,8 +264,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) ==
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 16) == 10000 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 50 &&
                                packet.Data[Offsets.IpcData + 21] > 0
-                ); // We don't actually check for the Sprint effect because this is enough, but we can if necessary in the future.
+                );
             //=================
             RegisterScanner("EventStart", "Please begin fishing and put your rod away immediately.",
                 PacketSource.Server,
@@ -373,7 +374,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     return logMessage == 0 &&
                            targetZone == 133 &&
                            animation == 112 &&
-                           fadeOutTime == 14 &&
+                           fadeOutTime == 15 &&
                            packet.SourceActor == packet.TargetActor;
                 });
             //=================
