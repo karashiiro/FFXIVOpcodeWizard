@@ -94,7 +94,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("Playtime", "Please type /playtime.",
                 PacketSource.Server,
-                (packet, parameters) => {
+                (packet, parameters) =>
+                {
                     if (packet.PacketSize != 40 || packet.SourceActor != packet.TargetActor) return false;
 
                     var playtime = BitConverter.ToUInt32(packet.Data, (int)Offsets.IpcData);
@@ -129,7 +130,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
             const int marketBoardItemDetectionId = 17837; // Grade 7 Dark Matter
             RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketSource.Server,
-                (packet, _) => {
+                (packet, _) =>
+                {
                     if (packet.PacketSize != 208) return false;
 
                     for (var i = 0; i < 22; ++i)
@@ -306,7 +308,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
             uint inventoryModifyHandlerId = 0;
             RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
                 PacketSource.Client,
-                (packet, _, comment) => {
+                (packet, _, comment) =>
+                {
                     var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
                     if (!match) return false;
 
@@ -321,7 +324,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
             RegisterScanner("InventoryTransaction", "Please wait.",
                 PacketSource.Server,
-                (packet, _) => {
+                (packet, _) =>
+                {
                     var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
                     if (!match) return false;
 
@@ -401,7 +405,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("PlaceFieldMarkerPreset", "Please type /waymark clear",
                 PacketSource.Server,
-                (packet, _) => 
+                (packet, _) =>
                 {
                     if (packet.PacketSize != 136 || packet.SourceActor != packet.TargetActor) return false;
 
@@ -424,12 +428,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             RegisterScanner("Effect", "Switch to White Mage, and cast Glare on an enemy. Then wait for a damage tick.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
-            //=================
-            RegisterScanner("AddStatusEffect", "Please use Dia.",
-                PacketSource.Server,
-                (packet, _) => 
-                    packet.PacketSize == 128 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 30) == 1871 || 
-                    packet.PacketSize == 120 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 1871);
             //=================
             RegisterScanner("StatusEffectList", "Please wait...",
                 PacketSource.Server,
@@ -475,10 +473,18 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            digit <= 9;
                 });
             //=================
+            int fcRank = 0;
             RegisterScanner("FreeCompanyInfo", "Load a zone.",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == int.Parse(parameters[0]),
+                (packet, parameters) =>
+                {
+                    fcRank = int.Parse(parameters[0]);
+                    return packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == fcRank;
+                },
                 new[] { "Please enter your Free Company rank:" });
+            RegisterScanner("FreeCompanyDialog", "Open your Free Company window (press G)",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 0x31] == fcRank);
             //=================
             RegisterScanner("AirshipTimers", "Open your Estate tab from the Timers window if you have any airships on exploration.",
                 PacketSource.Server,
@@ -502,7 +508,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 new[] { "Please enter the experience from the first sector:" });
             RegisterScanner("SubmarineProgressionStatus", "Open your submarine management console if you have any submarines",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1  && packet.Data[Offsets.IpcData] <= 4);
+                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1 && packet.Data[Offsets.IpcData] <= 4);
             RegisterScanner("SubmarineStatusList", "Open your submarine management console if you have any submarines",
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize == 272 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
