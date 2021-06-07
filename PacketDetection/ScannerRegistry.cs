@@ -303,7 +303,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 104 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x12) % 1000000 == 5267);
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000 == 5267);
             //=================
             uint inventoryModifyHandlerId = 0;
             RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
