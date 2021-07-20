@@ -217,10 +217,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
+            /* Commented for now because this also matches UpdateTpHpMp
             RegisterScanner("ActorFreeSpawn", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 40 &&
                                packet.SourceActor == packet.TargetActor);
+            */
             //=================
             RegisterScanner("ContainerInfo", "Please teleport and open your chocobo saddlebag.",
                 PacketSource.Server,
