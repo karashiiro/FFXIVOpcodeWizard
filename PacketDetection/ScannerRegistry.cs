@@ -217,10 +217,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
                     int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
+            /* Commented for now because this also matches UpdateTpHpMp
             RegisterScanner("ActorFreeSpawn", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 40 &&
                                packet.SourceActor == packet.TargetActor);
+            */
             //=================
             RegisterScanner("ContainerInfo", "Please teleport and open your chocobo saddlebag.",
                 PacketSource.Server,
@@ -303,7 +305,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 104 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x12) % 1000000 == 5267);
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000 == 5267);
             //=================
             uint inventoryModifyHandlerId = 0;
             RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
