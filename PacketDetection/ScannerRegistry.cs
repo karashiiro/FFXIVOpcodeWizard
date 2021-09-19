@@ -212,6 +212,11 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize > 624 &&
                     IncludesBytes(packet.Data.Skip(588).Take(36).ToArray(), retainerBytes));
+            //================
+            RegisterScanner("ItemMarketBoardInfo", "Please put any item on sale for a unit price of 123456 and summon the retainer again",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 64 &&
+                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == 123456);
             //=================
             RegisterScanner("PlayerSpawn", "Please wait for another player to spawn in your vicinity.",
                 PacketSource.Server, (packet, parameters) =>
