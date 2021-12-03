@@ -265,17 +265,15 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, _) => packet.PacketSize == 128 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 132);
             //=================
-            RegisterScanner("EffectResult", "Please use Sprint while at full HP and MP.",
+            RegisterScanner("EffectResult", "Switch to Fisher and enable snagging.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 120 &&
+                (packet, _) => packet.PacketSize == 128 &&
                                packet.SourceActor == packet.TargetActor &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == packet.SourceActor &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) ==
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 16) == 10000 &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 26) == 50 &&
-                               packet.Data[Offsets.IpcData + 21] > 0
-                );
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == packet.SourceActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) ==
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x1E) == 761
+                ); ;
             //=================
             RegisterScanner("EventStart", "Please begin fishing and put your rod away immediately.",
                 PacketSource.Server,
