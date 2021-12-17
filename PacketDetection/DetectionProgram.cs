@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
+using Machina.Infrastructure;
 using static Machina.TCPNetworkMonitor;
 
 namespace FFXIVOpcodeWizard.PacketDetection
@@ -160,8 +161,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
         {
             return new FFXIVNetworkMonitor
             {
-                MessageReceived = OnMessageReceived,
-                MessageSent = OnMessageSent,
+                MessageReceivedEventHandler = OnMessageReceived,
+                MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
                 Region = args.Region,
             };
@@ -193,14 +194,14 @@ namespace FFXIVOpcodeWizard.PacketDetection
             }
         }
 
-        private void OnMessageReceived(string connection, long epoch, byte[] data)
+        private void OnMessageReceived(TCPConnection connection, long epoch, byte[] data)
         {
-            OnMessage(connection, epoch, data, PacketSource.Server);
+            OnMessage(connection.ToString(), epoch, data, PacketSource.Server);
         }
 
-        private void OnMessageSent(string connection, long epoch, byte[] data)
+        private void OnMessageSent(TCPConnection connection, long epoch, byte[] data)
         {
-            OnMessage(connection, epoch, data, PacketSource.Client);
+            OnMessage(connection.ToString(), epoch, data, PacketSource.Client);
         }
 
         private void OnMessage(string connection, long epoch, byte[] data, PacketSource source)

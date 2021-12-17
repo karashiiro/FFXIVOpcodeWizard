@@ -17,10 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AdonisUI" Version="1.16.0" />
-    <PackageReference Include="AdonisUI.ClassicTheme" Version="1.16.0" />
-    <PackageReference Include="Machina.FFXIV" Version="2.1.1" />
-    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.4.0" />
+    <PackageReference Include="AdonisUI" Version="1.17.1" />
+    <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
+    <PackageReference Include="Machina.FFXIV" Version="2.3.1.7" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.11.0" />
   </ItemGroup>
 
 </Project>
