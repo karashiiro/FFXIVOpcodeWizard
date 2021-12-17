@@ -113,6 +113,7 @@ namespace FFXIVOpcodeWizard
         {
             var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
             auxWindow.ShowDialog();
+            auxWindow.Activate();
             return (auxWindow.ReturnValue, auxWindow.Skipping);
         }
 
