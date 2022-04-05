@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace FFXIVOpcodeWizard.PacketDetection
@@ -20,6 +21,8 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private void DeclareScanners()
         {
+            var inArray = (uint[] arr, uint item) => arr.Any(i => i == item);
+
             //=================
             RegisterScanner("PlayerSetup", "Please log in.",
                 PacketSource.Server,
@@ -32,10 +35,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 PacketSource.Server,
                 (packet, parameters) =>
                 {
-                    if (maxHp == 0)
-                    {
-                        maxHp = int.Parse(parameters[0]);
-                    }
+                    maxHp = int.Parse(parameters[0]);
 
                     if (packet.PacketSize != 40 && packet.PacketSize != 48) return false;
 
@@ -45,7 +45,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     return packetHp == maxHp && packetMp == 10000;
                 }, new[] { "Please enter your max HP:" });
             //=================
-            RegisterScanner("PlayerStats", "Switch to another job, and then switch back.",
+            RegisterScanner("UpdateClassInfo", "Switch to the job you entered level for.",
+                PacketSource.Server, (packet, parameters) =>
+                    packet.PacketSize == 48 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
+                    int.Parse(parameters[0]), new[] { "Please enter your the level for another job:" });
+            //=================
+            RegisterScanner("PlayerStats", "Switch back to the job you entered HP for.",
                 PacketSource.Server, (packet, parameters) =>
                     packet.PacketSize == 256 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 24) == maxHp &&
                     BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 28) == 10000 && // MP equals 10000
@@ -127,7 +132,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, parameters) => packet.PacketSize == 1016 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
                 new[] { "Please enter a nearby character's name:" });
             //=================
-            const int marketBoardItemDetectionId = 17837; // Grade 7 Dark Matter
+            uint[] darkMatter = new uint[] { 5594, 5595, 5596, 5597, 5598, 10386, 17837, 33916 };
+            var isDarkMatter = (uint itemId) => inArray(darkMatter, itemId);
+
             RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
                 PacketSource.Server,
                 (packet, _) =>
@@ -142,7 +149,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                             break;
                         }
 
-                        if (itemId == marketBoardItemDetectionId)
+                        if (itemId == darkMatter[6])
                         {
                             return true;
                         }
@@ -150,28 +157,54 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
                     return false;
                 });
-            RegisterScanner("MarketBoardItemListingCount", "Please open the market board listings for Grade 7 Dark Matter.",
+            RegisterScanner("MarketBoardItemListingCount", "Please open the market board listings for any Dark Matter.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == marketBoardItemDetectionId);
+                (packet, _) => packet.PacketSize == 48 && 
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
             RegisterScanner("MarketBoardItemListingHistory", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 1080 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == marketBoardItemDetectionId);
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
             RegisterScanner("MarketBoardItemListing", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize > 1552 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44) == marketBoardItemDetectionId);
-            RegisterScanner("MarketBoardPurchaseHandler", "Please purchase Grade 7 Dark Matter",
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44)));
+            RegisterScanner("MarketBoardPurchaseHandler", "Please purchase any Dark Matter",
                 PacketSource.Client,
                 (packet, _) => packet.PacketSize == 72 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == marketBoardItemDetectionId);
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10)));
             RegisterScanner("MarketBoardPurchase", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == marketBoardItemDetectionId);
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
             //=================
-            RegisterScanner("ActorMove", "Please teleport to Limsa Lominsa Lower Decks and wait.",
+            var lightningCrystals = -1;
+            RegisterScanner("ActorCast", "Please teleport to Limsa Lominsa Lower Decks.",
+                PacketSource.Server,
+                (packet, parameters) =>
+                {
+                    if (lightningCrystals == -1) lightningCrystals = int.Parse(parameters[0]);
+                    return packet.PacketSize == 64 &&
+                           BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 5;
+                },
+                new[] { "Please enter the number of Lightning Crystals you have:" });
+            RegisterScanner("CurrencyCrystalInfo", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 64 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) == 2001 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) == 10 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == 12);
+            RegisterScanner("InitZone", string.Empty, PacketSource.Server,
+                (packet, _) => packet.PacketSize == 128 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 129);
+            //=================
+            var actorMoveCenter = new Vector3(-85f, 19f, 0);
+            var inRange = (Vector3 diff, Vector3 range) =>
+            {
+                return Math.Abs(diff.X) < range.X && Math.Abs(diff.Y) < range.Y && Math.Abs(diff.Z) < range.Z;
+            };
+            RegisterScanner("ActorMove", "Please wait. (Teleport to Limsa Lominsa Lower Decks if you haven't)",
                 PacketSource.Server,
                 (packet, _) =>
                 {
@@ -180,9 +213,181 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     var x = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) / 65536 * 2000 - 1000;
                     var y = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) / 65536 * 2000 - 1000;
                     var z = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 12) / 65536 * 2000 - 1000;
-                    return Math.Abs(x + 85) < 15 && Math.Abs(z - 0) < 15 && Math.Abs(y - 19) < 2;
+
+                    return inRange(new Vector3(x, y, z) - actorMoveCenter, new Vector3(15, 2, 15));
                 }
             );
+            //=================
+            RegisterScanner("PlayerSpawn", "Please wait for another player to spawn in your vicinity.",
+                PacketSource.Server, (packet, parameters) =>
+                    packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
+                    int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
+            /* Commented for now because this also matches UpdateTpHpMp
+            RegisterScanner("ActorFreeSpawn", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 40 &&
+                               packet.SourceActor == packet.TargetActor);
+            */
+            //=================
+            RegisterScanner("ActorSetPos", "Please wait, this may take some time. You can also teleport to another Aethernet Shard in the same map and then teleport back.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 56) return false;
+
+                    var x = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 8);
+                    var y = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 12);
+                    var z = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 16);
+
+                    return inRange(new Vector3(x, y, z) - actorMoveCenter, new Vector3(15, 2, 15));
+                }
+            );
+            //=================
+            RegisterScanner("HousingWardInfo", "Please view a housing ward from a city aetheryte/ferry.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 2440 &&
+                        IncludesBytes(new ArraySegment<byte>(packet.Data, Offsets.IpcData + 16, 32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])),
+                new[] { "Please enter the name of whoever owns the first house in the ward (if it's an FC, their shortname):" });
+            //=================
+            RegisterScanner("PrepareZoning", "Please teleport to The Aftcastle (Adventurers' Guild in Limsa Lominsa Upper Decks).",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 48) return false;
+
+                    var logMessage = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    var targetZone = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+                    var animation = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6);
+                    var fadeOutTime = packet.Data[Offsets.IpcData + 10];
+
+                    return logMessage == 0 &&
+                           targetZone == 128 &&
+                           animation == 112 &&
+                           fadeOutTime == 15 &&
+                           packet.SourceActor == packet.TargetActor;
+                });
+            //=================
+            RegisterScanner("ContainerInfo", "Please wait.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 2001);
+            RegisterScanner("ItemInfo", "Please open your chocobo saddlebag.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 96 &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 4000);
+            //=================
+            RegisterScanner("PlaceFieldMarker", "Please target The Aftcastle Aethernet Shard and type /waymark A <t>",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                    packet.SourceActor == packet.TargetActor &&
+                    BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 0x0100 &&
+                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04) == 0x3edc &&
+                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 0x9c70);
+            //=================
+            RegisterScanner("PlaceFieldMarkerPreset", "Please type /waymark clear",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 136 || packet.SourceActor != packet.TargetActor) return false;
+
+                    for (var i = 0; i < 24; i++)
+                    {
+                        if (BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04 + 4 * i) != 0) return false;
+                    }
+
+                    return true;
+                });
+            //=================
+            RegisterScanner("EffectResult", "Switch to Fisher and enable snagging.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 128 &&
+                               packet.SourceActor == packet.TargetActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == packet.SourceActor &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) ==
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) &&
+                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x1E) == 761
+                ); ;
+            //=================
+            RegisterScanner("EventStart", "Please begin fishing and put your rod away immediately.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 56 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 0x150001);
+            RegisterScanner("EventPlay", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 72 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 0x150001);
+            RegisterScanner("EventFinish", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == 0x150001 &&
+                               packet.Data[Offsets.IpcData + 4] == 0x14 &&
+                               packet.Data[Offsets.IpcData + 5] == 0x01);
+            //=================
+            RegisterScanner("SomeDirectorUnk4", "Please cast your line and catch a fish at Limsa Lominsa.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 56 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 257);
+            RegisterScanner("EventPlay4", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 80 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x1C) == 284);
+            //=================
+            uint[] limsaLominsaFishes = new uint[] { 4869, 4870, 4776, 4871, 4872, 4874, 4876 };
+            RegisterScanner("DesynthResult", "Please desynth the fish (You can also purchase a Merlthor Goby / Lominsan Anchovy / Harbor Herring from marketboard).",
+                PacketSource.Server,
+                (packet, _) => (packet.PacketSize == 104 || packet.PacketSize == 136) &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000 == 5267);
+            //=================
+            int fcRank = 0;
+            RegisterScanner("FreeCompanyInfo", "Load a zone. (If you are running scanners by order, suggest teleporting to Aetheryte Plaza)",
+                PacketSource.Server,
+                (packet, parameters) =>
+                {
+                    fcRank = int.Parse(parameters[0]);
+                    return packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == fcRank;
+                },
+                new[] { "Please enter your Free Company rank:" });
+            RegisterScanner("FreeCompanyDialog", "Open your Free Company window (press G)",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 0x31] == fcRank);
+            //=================
+            const uint scannerItemId = 4850; // Honey
+            RegisterScanner("UpdateInventorySlot", "Please purchase a Honey from Tradecraft Supplier (2 gil).",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 96 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == scannerItemId);
+            //=================
+            uint inventoryModifyHandlerId = 0;
+            RegisterScanner("InventoryModifyHandler", "Please drop the Honey.",
+                PacketSource.Client,
+                (packet, _, comment) =>
+                {
+                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == scannerItemId;
+                    if (!match) return false;
+
+                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+
+                    var baseOffset = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
+                    comment.Text = $"Base offset: {Util.NumberToString(baseOffset, NumberDisplayFormat.HexadecimalUppercase)}";
+                    return true;
+                });
+            RegisterScanner("InventoryActionAck", "Please wait.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
+            RegisterScanner("InventoryTransaction", "Please wait.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == scannerItemId;
+                    if (!match) return false;
+
+                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
+                    return true;
+                });
+            RegisterScanner("InventoryTransactionFinish", "Please wait.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
             //=================
             RegisterScanner("ResultDialog", "Please visit a retainer counter and request information about market tax rates.",
                 PacketSource.Server,
@@ -218,128 +423,28 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, parameters) => packet.PacketSize == 64 &&
                 BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == 123456);
             //=================
-            RegisterScanner("PlayerSpawn", "Please wait for another player to spawn in your vicinity.",
-                PacketSource.Server, (packet, parameters) =>
-                    packet.PacketSize > 500 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
-                    int.Parse(parameters[0]), new[] { "Please enter your world ID:" });
-            /* Commented for now because this also matches UpdateTpHpMp
-            RegisterScanner("ActorFreeSpawn", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 40 &&
-                               packet.SourceActor == packet.TargetActor);
-            */
-            //=================
-            RegisterScanner("ContainerInfo", "Please teleport and open your chocobo saddlebag.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 2001);
-            RegisterScanner("ItemInfo", string.Empty,
+            RegisterScanner("ObjectSpawn", "Please enter a furnished house.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 96 &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 4000);
+                               packet.Data[Offsets.IpcData + 1] == 12 &&
+                               packet.Data[Offsets.IpcData + 2] == 4 &&
+                               packet.Data[Offsets.IpcData + 3] == 0 &&
+                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) == 0);
             //=================
-            RegisterScanner("UpdateClassInfo",
-                "Please switch to the job you entered a level for:",
-                PacketSource.Server, (packet, parameters) =>
-                    packet.PacketSize == 48 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) ==
-                    int.Parse(parameters[0]), new[] { "Please enter the level of the job you can switch to:" });
+            RegisterScanner("Effect", "Switch to White Mage, and cast Dia on an enemy. Then wait for a damage tick.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16532);
             //=================
-            var lightningCrystals = -1;
-            RegisterScanner("ActorCast", "Please teleport to New Gridania.",
+            RegisterScanner("StatusEffectList", "Please wait...",
                 PacketSource.Server,
-                (packet, parameters) =>
-                {
-                    if (lightningCrystals == -1) lightningCrystals = int.Parse(parameters[0]);
-                    return packet.PacketSize == 64 &&
-                           BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 5;
-                },
-                new[] { "Please enter the number of Lightning Crystals you have:" });
-            RegisterScanner("CurrencyCrystalInfo", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) == 2001 &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) == 10 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == 12);
-            RegisterScanner("InitZone", string.Empty, PacketSource.Server,
-                (packet, _) => packet.PacketSize == 128 &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 132);
+                (packet, _) => packet.PacketSize == 416 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 1871);
             //=================
-            RegisterScanner("EffectResult", "Switch to Fisher and enable snagging.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 128 &&
-                               packet.SourceActor == packet.TargetActor &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == packet.SourceActor &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) ==
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) &&
-                               BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x1E) == 761
-                ); ;
-            //=================
-            RegisterScanner("EventStart", "Please begin fishing and put your rod away immediately.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 56 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 0x150001);
-            RegisterScanner("EventPlay", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 72 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == 0x150001);
-            RegisterScanner("EventFinish", string.Empty,
+            RegisterScanner("ActorGauge", "Wait for gauge changes, then clear the lilies.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 48 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == 0x150001 &&
-                               packet.Data[Offsets.IpcData + 4] == 0x14 &&
-                               packet.Data[Offsets.IpcData + 5] == 0x01);
-            //=================
-            RegisterScanner("SomeDirectorUnk4", "Please cast your line and catch a fish.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 56 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 257);
-            RegisterScanner("EventPlay4", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 80 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x1C) == 284);
-            //=================
-            RegisterScanner("UpdateInventorySlot", "Please purchase a Pill Bug to use as bait.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 96 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10) == 2587);
-            //=================
-            RegisterScanner("DesynthResult", "Please desynth a Merlthor Goby (can be found on marketboard for a couple gil).",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 104 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000 == 5267);
-            //=================
-            uint inventoryModifyHandlerId = 0;
-            RegisterScanner("InventoryModifyHandler", "Please drop the Pill Bug.",
-                PacketSource.Client,
-                (packet, _, comment) =>
-                {
-                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
-                    if (!match) return false;
-
-                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
-
-                    var baseOffset = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
-                    comment.Text = $"Base offset: {Util.NumberToString(baseOffset, NumberDisplayFormat.HexadecimalUppercase)}";
-                    return true;
-                });
-            RegisterScanner("InventoryActionAck", "Please wait.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
-            RegisterScanner("InventoryTransaction", "Please wait.",
-                PacketSource.Server,
-                (packet, _) =>
-                {
-                    var match = packet.PacketSize == 80 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 0x18) == 2587;
-                    if (!match) return false;
-
-                    inventoryModifyHandlerId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
-                    return true;
-                });
-            RegisterScanner("InventoryTransactionFinish", "Please wait.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == inventoryModifyHandlerId);
+                    packet.Data[Offsets.IpcData] == 24 &&
+                    packet.Data[Offsets.IpcData + 5] == 0 &&
+                    packet.Data[Offsets.IpcData + 6] > 0);
             //=================
             RegisterScanner("CFPreferredRole", "Please wait, this may take some time...", PacketSource.Server, (packet, _) =>
             {
@@ -355,9 +460,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 return allInRange;
             });
             //=================
-            RegisterScanner("CFNotify", "Please enter the \"The Vault\" as an undersized party.", // CFNotifyPop
+            RegisterScanner("CFNotify", "Please enter the \"Sastasha\" as an undersized party.", // CFNotifyPop
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 && packet.Data[Offsets.IpcData + 20] == 0x22);
+                (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 4);
             //=================
             RegisterScanner("UpdatePositionInstance", "Please move your character in an/the instance.",
                 PacketSource.Client,
@@ -369,97 +474,69 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt64(packet.Data, Offsets.IpcData + 0x18) != 0 &&
                                BitConverter.ToUInt32(packet.Data, packet.Data.Length - 4) == 0);
             //=================
-            RegisterScanner("PrepareZoning", "Please find an Aethernet Shard and teleport to Lancers' Guild.",
-                PacketSource.Server,
-                (packet, _) =>
-                {
-                    if (packet.PacketSize != 48) return false;
+            uint[] whmHoly = new uint[] { 139, 25860 };
+            var isHolyPacket = (IpcPacket packet, uint packetSize) => packet.PacketSize == packetSize && inArray(whmHoly, BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8));
 
-                    var logMessage = BitConverter.ToUInt32(packet.Data, Offsets.IpcData);
-                    var targetZone = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4);
-                    var animation = BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6);
-                    var fadeOutTime = packet.Data[Offsets.IpcData + 10];
-
-                    return logMessage == 0 &&
-                           targetZone == 133 &&
-                           animation == 112 &&
-                           fadeOutTime == 15 &&
-                           packet.SourceActor == packet.TargetActor;
-                });
-            //=================
-            RegisterScanner("ActorSetPos", "Please teleport to Mih Khetto's Amphitheatre via the Aethernet Shard.",
-                PacketSource.Server,
-                (packet, _) =>
-                {
-                    if (packet.PacketSize != 56) return false;
-
-                    var x = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 8);
-                    var y = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 12);
-                    var z = BitConverter.ToSingle(packet.Data, Offsets.IpcData + 16);
-
-                    return Math.Abs(x + 75) < 15 && Math.Abs(z + 140) < 15 && Math.Abs(y - 7) < 2;
-                }
-            );
-            //=================
-            RegisterScanner("PlaceFieldMarker", "Please target the Mih Khetto's Amphitheatre Aethernet Shard and type /waymark A <t>",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                    packet.SourceActor == packet.TargetActor &&
-                    BitConverter.ToUInt16(packet.Data, Offsets.IpcData) == 256 &&
-                    BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 7237);
-            //=================
-            RegisterScanner("PlaceFieldMarkerPreset", "Please type /waymark clear",
-                PacketSource.Server,
-                (packet, _) =>
-                {
-                    if (packet.PacketSize != 136 || packet.SourceActor != packet.TargetActor) return false;
-
-                    for (var i = 0; i < 24; i++)
-                    {
-                        if (BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x04 + 4 * i) != 0) return false;
-                    }
-
-                    return true;
-                });
-            //=================
-            RegisterScanner("ObjectSpawn", "Please enter a furnished house.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 96 &&
-                               packet.Data[Offsets.IpcData + 1] == 12 &&
-                               packet.Data[Offsets.IpcData + 2] == 4 &&
-                               packet.Data[Offsets.IpcData + 3] == 0 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) == 0);
-            //=================
-            RegisterScanner("Effect", "Switch to White Mage, and cast Glare on an enemy. Then wait for a damage tick.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16533);
-            //=================
-            RegisterScanner("StatusEffectList", "Please wait...",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 416 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 1871);
-            //=================
-            RegisterScanner("ActorGauge", "Wait for gauge changes, then clear the lilies.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                    packet.Data[Offsets.IpcData] == 24 &&
-                    packet.Data[Offsets.IpcData + 5] == 0 &&
-                    packet.Data[Offsets.IpcData + 6] > 0);
-            //=================
             RegisterScanner("AoeEffect8", "Attack multiple enemies with Holy.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 668 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 139);
+                (packet, _) => isHolyPacket(packet, 668));
             //=================
             RegisterScanner("AoeEffect16", "Attack multiple enemies (>8) with Holy.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 1244 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 139);
+                (packet, _) => isHolyPacket(packet, 1244));
             //=================
             RegisterScanner("AoeEffect24", "Attack multiple enemies (>16) with Holy.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 1820 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 139);
+                (packet, _) => isHolyPacket(packet, 1820));
             //=================
             RegisterScanner("AoeEffect32", "Attack multiple enemies (>24) with Holy.",
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 2396 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 139);
+                (packet, _) => isHolyPacket(packet, 2396));
+            //=================
+            RegisterScanner("SystemLogMessage", "Please go to first boss room and touch any coral formation.",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 56 &&
+                        inArray(new uint[] { 2034, 2035 }, BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4)));
+            //=================
+            string airshipName = null;
+            string submarineName = null;
+
+            RegisterScanner("AirshipTimers", "Open your Estate tab from the Timers window if you have any airships on exploration.",
+                PacketSource.Server,
+                (packet, parameters) =>
+                {
+                    airshipName = parameters[0];
+                    return packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(airshipName));
+                },
+                new[] { "Please enter your airship name:" });
+            RegisterScanner("SubmarineTimers", "Open your Estate tab from the Timers window if you have any submarines on exploration.",
+                PacketSource.Server,
+                (packet, parameters) =>
+                {
+                    submarineName = parameters[0];
+                    return packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(submarineName));
+                },
+                new[] { "Please enter your submarine name:" });
+            RegisterScanner("AirshipStatusList", "Open your airship management console if you have any airships",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 192 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(airshipName)));
+            RegisterScanner("AirshipStatus", "Check the status of a specific airship if you have any airships",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 104 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(airshipName)));
+            RegisterScanner("AirshipExplorationResult", "Open a voyage log from an airship",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == int.Parse(parameters[0]),
+                new[] { "Please enter the experience from the first sector (first destination in log, not the ones next to report rank and items):" });
+            RegisterScanner("SubmarineProgressionStatus", "Open your submarine management console if you have any submarines",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1 && packet.Data[Offsets.IpcData] <= 4);
+            RegisterScanner("SubmarineStatusList", "Open your submarine management console if you have any submarines",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 272 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(submarineName)));
+            RegisterScanner("SubmarineExplorationResult", "Open a voyage log from a submarine",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == int.Parse(parameters[0]),
+                new[] { "Please enter the experience from the first sector (first destination in log, not the ones next to report rank and items):" });
             //=================
             RegisterScanner("MiniCactpotInit", "Start playing Mini Cactpot.",
                 PacketSource.Server,
@@ -477,57 +554,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            row <= 2 &&
                            digit <= 9;
                 });
-            //=================
-            int fcRank = 0;
-            RegisterScanner("FreeCompanyInfo", "Load a zone.",
-                PacketSource.Server,
-                (packet, parameters) =>
-                {
-                    fcRank = int.Parse(parameters[0]);
-                    return packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == fcRank;
-                },
-                new[] { "Please enter your Free Company rank:" });
-            RegisterScanner("FreeCompanyDialog", "Open your Free Company window (press G)",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 0x31] == fcRank);
-            //=================
-            RegisterScanner("AirshipTimers", "Open your Estate tab from the Timers window if you have any airships on exploration.",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter your airship name:" });
-            RegisterScanner("SubmarineTimers", "Open your Estate tab from the Timers window if you have any submarines on exploration.",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 176 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter your submarine name:" });
-            RegisterScanner("AirshipStatusList", "Open your airship management console if you have any airships",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 192 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter your airship name:" });
-            RegisterScanner("AirshipStatus", "Check the status of a specific airship if you have any airships",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 104 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter your airship name:" });
-            RegisterScanner("AirshipExplorationResult", "Open a voyage log from an airship",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 4) == int.Parse(parameters[0]),
-                new[] { "Please enter the experience from the first sector:" });
-            RegisterScanner("SubmarineProgressionStatus", "Open your submarine management console if you have any submarines",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1 && packet.Data[Offsets.IpcData] <= 4);
-            RegisterScanner("SubmarineStatusList", "Open your submarine management console if you have any submarines",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 272 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter your submarine name:" });
-            RegisterScanner("SubmarineExplorationResult", "Open a voyage log from a submarine",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == int.Parse(parameters[0]),
-                new[] { "Please enter the experience from the first sector:" });
-            //=================
-            RegisterScanner("HousingWardInfo", "Please view a housing ward from a city aetheryte/ferry.",
-                PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 2440 &&
-                        IncludesBytes(new ArraySegment<byte>(packet.Data, Offsets.IpcData + 16, 32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])),
-                new[] { "Please enter the name of whoever owns the first house in the ward (if it's an FC, their shortname):" });
         }
 
         /// <summary>
