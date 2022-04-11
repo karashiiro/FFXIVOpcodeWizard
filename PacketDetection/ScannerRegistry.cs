@@ -132,52 +132,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, parameters) => packet.PacketSize == 1016 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0])),
                 new[] { "Please enter a nearby character's name:" });
             //=================
-            uint[] darkMatter = new uint[] { 5594, 5595, 5596, 5597, 5598, 10386, 17837, 33916 };
-            var isDarkMatter = (uint itemId) => inArray(darkMatter, itemId);
-
-            RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
-                PacketSource.Server,
-                (packet, _) =>
-                {
-                    if (packet.PacketSize != 208) return false;
-
-                    for (var i = 0; i < 22; ++i)
-                    {
-                        var itemId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8 * i);
-                        if (itemId == 0)
-                        {
-                            break;
-                        }
-
-                        if (itemId == darkMatter[6])
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                });
-            RegisterScanner("MarketBoardItemListingCount", "Please open the market board listings for any Dark Matter.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 && 
-                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
-            RegisterScanner("MarketBoardItemListingHistory", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 1080 &&
-                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
-            RegisterScanner("MarketBoardItemListing", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize > 1552 &&
-                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44)));
-            RegisterScanner("MarketBoardPurchaseHandler", "Please purchase any Dark Matter",
-                PacketSource.Client,
-                (packet, _) => packet.PacketSize == 72 &&
-                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10)));
-            RegisterScanner("MarketBoardPurchase", string.Empty,
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 48 &&
-                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
-            //=================
             var lightningCrystals = -1;
             RegisterScanner("ActorCast", "Please teleport to Limsa Lominsa Lower Decks.",
                 PacketSource.Server,
@@ -349,9 +303,55 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     return packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 45] == fcRank;
                 },
                 new[] { "Please enter your Free Company rank:" });
-            RegisterScanner("FreeCompanyDialog", "Open your Free Company window (press G)",
+            RegisterScanner("FreeCompanyDialog", "Open your Free Company window (press G or ;)",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 112 && packet.Data[Offsets.IpcData + 0x31] == fcRank);
+            //=================
+            uint[] darkMatter = new uint[] { 5594, 5595, 5596, 5597, 5598, 10386, 17837, 33916 };
+            var isDarkMatter = (uint itemId) => inArray(darkMatter, itemId);
+
+            RegisterScanner("MarketBoardSearchResult", "Please click \"Catalysts\" on the market board.",
+                PacketSource.Server,
+                (packet, _) =>
+                {
+                    if (packet.PacketSize != 208) return false;
+
+                    for (var i = 0; i < 22; ++i)
+                    {
+                        var itemId = BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8 * i);
+                        if (itemId == 0)
+                        {
+                            break;
+                        }
+
+                        if (itemId == darkMatter[6])
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+            RegisterScanner("MarketBoardItemListingCount", "Please open the market board listings for any Dark Matter.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
+            RegisterScanner("MarketBoardItemListingHistory", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 1080 &&
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
+            RegisterScanner("MarketBoardItemListing", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize > 1552 &&
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44)));
+            RegisterScanner("MarketBoardPurchaseHandler", "Please purchase any Dark Matter",
+                PacketSource.Client,
+                (packet, _) => packet.PacketSize == 72 &&
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x10)));
+            RegisterScanner("MarketBoardPurchase", string.Empty,
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 48 &&
+                               isDarkMatter(BitConverter.ToUInt32(packet.Data, Offsets.IpcData)));
             //=================
             const uint scannerItemId = 4850; // Honey
             RegisterScanner("UpdateInventorySlot", "Please purchase a Honey from Tradecraft Supplier (2 gil).",
