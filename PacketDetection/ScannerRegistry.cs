@@ -333,11 +333,12 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x1C) == 284);
             //=================
             uint[] limsaLominsaFishes = new uint[] { 4869, 4870, 4776, 4871, 4872, 4874, 4876 };
-            RegisterScanner("DesynthResult", "Please desynth the fish (You can also purchase a Merlthor Goby / Lominsan Anchovy / Harbor Herring from marketboard).",
+            uint[] desynthResult = new uint[] { 5267, 5823 };
+            RegisterScanner("DesynthResult", "Please desynth the fish (You can also purchase a Merlthor Goby, Lominsan Anchovy or Harbor Herring from marketboard). If you got items other than Fine Sand and Allagan Tin Piece, please desynth again.",
                 PacketSource.Server,
                 (packet, _) => (packet.PacketSize == 104 || packet.PacketSize == 136) &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000 == 4869 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000 == 5267);
+                               inArray(limsaLominsaFishes, BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) % 1000000) &&
+                               inArray(desynthResult, BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x0C) % 1000000));
             //=================
             int fcRank = 0;
             RegisterScanner("FreeCompanyInfo", "Load a zone. (If you are running scanners by order, suggest teleporting to Aetheryte Plaza)",
