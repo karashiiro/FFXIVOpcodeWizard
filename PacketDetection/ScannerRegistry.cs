@@ -199,7 +199,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("HousingWardInfo", "Please view a housing ward from a city aetheryte/ferry.",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 2440 &&
+                (packet, parameters) => packet.PacketSize == 2448 &&
                         IncludesBytes(new ArraySegment<byte>(packet.Data, Offsets.IpcData + 16, 32).ToArray(), Encoding.UTF8.GetBytes(parameters[0])),
                 new[] { "Please enter the name of whoever owns the first house in the ward (if it's an FC, their shortname):" });
             //=================
