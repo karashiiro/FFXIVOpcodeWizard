@@ -530,7 +530,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 new[] { "Please enter the experience from the first sector (first destination in log, not the ones next to report rank and items):" });
             RegisterScanner("SubmarineProgressionStatus", "Open your submarine management console if you have any submarines",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 56 && packet.Data[Offsets.IpcData] >= 1 && packet.Data[Offsets.IpcData] <= 4);
+                (packet, parameters) => packet.PacketSize == 64 && packet.Data[Offsets.IpcData] >= 1 && packet.Data[Offsets.IpcData] <= 4);
             RegisterScanner("SubmarineStatusList", "Open your submarine management console if you have any submarines",
                 PacketSource.Server,
                 (packet, parameters) => packet.PacketSize == 272 && IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(submarineName)));
