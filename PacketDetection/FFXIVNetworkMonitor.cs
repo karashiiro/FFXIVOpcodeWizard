@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using FFXIVOpcodeWizard;
+using System.Reflection;
 using Machina;
 using Machina.FFXIV;
 using Machina.Infrastructure;
@@ -31,10 +31,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
     ///     
     /// This class uses the Machina.TCPNetworkMonitor class to find and monitor the communication from Final Fantasy XIV.  It decodes the data thaat adheres to the
     ///   FFXIV network packet format and calls the message delegate when data is received.
-    ///
-    /// This is an edited version of Machina.FFXIV.FFXIVNetworkMonitor.
-    ///   Since the original class locks the WindowName to "FINAL FANTASY XIV", it's kind of complex to implement
-    ///   support for Chinese Server base on it, as the Chinese version of client uses a translated name.
     /// </summary>
     public class FFXIVNetworkMonitor : IDisposable
     {
@@ -44,7 +40,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// </summary>
         public NetworkMonitorType MonitorType
         { get; set; } = NetworkMonitorType.RawSocket;
-
+        
         /// <summary>
         /// Specifies the region so that WindowName can be set properly
         /// </summary>
@@ -72,6 +68,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// </summary>
         public bool UseRemoteIpFilter
         { get; set; }
+
+        /// <summary>
+        /// This class keeps the information needed to authenticate the user on a remote machine or read a local file via PCap.
+        /// The remote machine can either grant or refuse the access according to the information provided. In case the NULL authentication is required, both 'username' and 'password' can be NULL pointers.
+        /// </summary>
+        public TCPNetworkMonitorConfig.RPCapConf RPCap
+        { get; set; } = new TCPNetworkMonitorConfig.RPCapConf();
+
+        public string FFXIVDX11ExecutablePath
+        { get; set; } = @"C:\Program Files (x86)\FINAL FANTASY XIV - A Realm Reborn\game\ffxiv_dx11.exe";
 
         #region Message Delegates section
         public delegate void MessageReceived2(TCPConnection connection, long epoch, byte[] message);
@@ -125,9 +131,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
             _monitor.Config.MonitorType = MonitorType;
             _monitor.Config.LocalIP = LocalIP;
             _monitor.Config.UseRemoteIpFilter = UseRemoteIpFilter;
+            _monitor.Config.RPCap = RPCap;
 
             _monitor.DataSentEventHandler = (TCPConnection connection, byte[] data) => ProcessSentMessage(connection, data);
             _monitor.DataReceivedEventHandler = (TCPConnection connection, byte[] data) => ProcessReceivedMessage(connection, data);
+
+            // initialize Oodle static
+            typeof(FFXIVBundleDecoder).Assembly
+                .GetType("FFXIVOodle_Native")?
+                .GetMethod("Initialize")?
+                .Invoke(null, new object[]{ FFXIVDX11ExecutablePath });
 
             _monitor.Start();
         }
