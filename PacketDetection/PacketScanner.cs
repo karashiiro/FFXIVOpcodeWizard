@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace FFXIVOpcodeWizard.PacketDetection
 {
-    public class PacketScanner
+    public static class PacketScanner
     {
         /// <summary>
         /// Pull packets from the queue and do basic parsing on them.

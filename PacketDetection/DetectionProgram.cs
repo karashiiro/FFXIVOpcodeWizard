@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using Machina.Infrastructure;
-using static Machina.TCPNetworkMonitor;
 
 namespace FFXIVOpcodeWizard.PacketDetection
 {
@@ -47,7 +46,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.skipped = false;
 
             this.pq = new Queue<Packet>();
-            var scannerHost = new PacketScanner();
 
             var state = new State
             {
@@ -83,7 +81,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     };
                 }
 
-                await RunScanner(scanner, parameters, scannerHost);
+                await RunScanner(scanner, parameters);
 
                 scanner.Running = false;
 
@@ -102,8 +100,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.skipped = false;
 
             this.pq = new Queue<Packet>();
-
-            var scannerHost = new PacketScanner();
 
             var state = new State();
 
@@ -130,7 +126,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 };
             }
 
-            await RunScanner(scanner, parameters, scannerHost);
+            await RunScanner(scanner, parameters);
 
             onStateChanged(state);
 
@@ -164,11 +160,10 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 MessageReceivedEventHandler = OnMessageReceived,
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
-                Region = args.Region,
             };
         }
 
-        private Task RunScanner(Scanner scanner, string[] parameters, PacketScanner scannerHost)
+        private Task RunScanner(Scanner scanner, string[] parameters)
         {
             return Task.Run(() =>
             {
