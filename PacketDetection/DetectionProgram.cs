@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
+using Machina.FFXIV;
 using Machina.Infrastructure;
 
 namespace FFXIVOpcodeWizard.PacketDetection
@@ -160,6 +161,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 MessageReceivedEventHandler = OnMessageReceived,
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
+                WindowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV",
             };
         }
 
