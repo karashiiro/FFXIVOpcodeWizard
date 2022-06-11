@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using Machina.FFXIV;
@@ -185,7 +185,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             {
                 try
                 {
-                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner, parameters, ref this.skipped);
+                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner, parameters, ref this.skipped, ref this.stopped);
                 }
                 catch (FormatException) { }
             });

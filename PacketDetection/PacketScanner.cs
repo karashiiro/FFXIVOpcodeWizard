@@ -29,9 +29,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
         /// <summary>
         /// Returns the opcode of the first packet to meet the conditions outlined by del.
         /// </summary>
-        public static ushort Scan(Queue<Packet> pq, Scanner scanner, string[] parameters, ref bool skipped)
+        public static ushort Scan(Queue<Packet> pq, Scanner scanner, string[] parameters, ref bool skipped, ref bool stopped)
         {
-            while (!skipped)
+            while (!skipped && !stopped)
             {
                 if (pq.Count == 0)
                     continue;
