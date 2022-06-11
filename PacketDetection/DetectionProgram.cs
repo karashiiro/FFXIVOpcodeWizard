@@ -170,8 +170,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             
             if (gamePath.EndsWith("ffxiv_dx11.exe"))
             {
-                monitor.FFXIVDX11ExecutablePath = Process.GetProcesses()
-                    .FirstOrDefault(p => p.MainWindowTitle == windowName)?.MainModule?.FileName;
+                monitor.FFXIVDX11ExecutablePath = gamePath;
             }
 
             return monitor;
