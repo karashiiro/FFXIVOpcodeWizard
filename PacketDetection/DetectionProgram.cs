@@ -158,17 +158,20 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private FFXIVNetworkMonitor BuildNetworkMonitor(Args args)
         {
-            var windowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV";
-            var gamePath = Process.GetProcesses().FirstOrDefault(p => p.MainWindowTitle == windowName)?.MainModule?.FileName;
+            var window = FindWindow("FFXIVGAME", null);
+            GetWindowThreadProcessId(window, out var pid);
+            var proc = Process.GetProcessById(Convert.ToInt32(pid));
+            var gamePath = proc.MainModule?.FileName;
+            
             var monitor = new FFXIVNetworkMonitor
             {
                 MessageReceivedEventHandler = OnMessageReceived,
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
-                WindowName = windowName,
+                WindowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV",
             };
             
-            if (!string.IsNullOrEmpty(gamePath) && gamePath.EndsWith("ffxiv_dx11.exe"))
+            if (!string.IsNullOrEmpty(gamePath))
             {
                 monitor.FFXIVDX11ExecutablePath = gamePath;
             }
@@ -186,20 +189,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 }
                 catch (FormatException) { }
             });
-        }
-
-        private void RequestParameters(Scanner scanner, string[] parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
-        {
-            for (var paramIndex = 0; paramIndex < parameters.Length; paramIndex++)
-            {
-                var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
-                if (skipRequested)
-                {
-                    skip = true;
-                    break;
-                }
-                parameters[paramIndex] = parameter ?? "";
-            }
         }
 
         private void OnMessageReceived(TCPConnection connection, long epoch, byte[] data)
@@ -225,5 +214,25 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 });
             }
         }
+        
+        private static void RequestParameters(Scanner scanner, IList<string> parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
+        {
+            for (var paramIndex = 0; paramIndex < parameters.Count; paramIndex++)
+            {
+                var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
+                if (skipRequested)
+                {
+                    skip = true;
+                    break;
+                }
+                parameters[paramIndex] = parameter ?? "";
+            }
+        }
+        
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        
+        [DllImport("user32.dll", SetLastError=true)]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
     }
 }
