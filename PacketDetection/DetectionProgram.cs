@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
 using Machina.FFXIV;
@@ -156,13 +158,23 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private FFXIVNetworkMonitor BuildNetworkMonitor(Args args)
         {
-            return new FFXIVNetworkMonitor
+            var windowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV";
+            var gamePath = Process.GetProcesses().FirstOrDefault(p => p.MainWindowTitle == windowName)?.MainModule?.FileName;
+            var monitor = new FFXIVNetworkMonitor
             {
                 MessageReceivedEventHandler = OnMessageReceived,
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
-                WindowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV",
+                WindowName = windowName,
             };
+            
+            if (gamePath.EndsWith("ffxiv_dx11.exe"))
+            {
+                monitor.FFXIVDX11ExecutablePath = Process.GetProcesses()
+                    .FirstOrDefault(p => p.MainWindowTitle == windowName)?.MainModule?.FileName;
+            }
+
+            return monitor;
         }
 
         private Task RunScanner(Scanner scanner, string[] parameters)
