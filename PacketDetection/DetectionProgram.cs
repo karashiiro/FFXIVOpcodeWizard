@@ -173,7 +173,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             
             if (!string.IsNullOrEmpty(gamePath))
             {
-                monitor.FFXIVDX11ExecutablePath = gamePath;
+                monitor.OodlePath = gamePath;
             }
 
             return monitor;

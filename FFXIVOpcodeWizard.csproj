@@ -5,7 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>karashiiro</Authors>
-    <Version>2.13.0</Version>
+    <Version>2.13.1</Version>
     <ApplicationIcon>application.ico</ApplicationIcon>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -19,8 +19,27 @@
   <ItemGroup>
     <PackageReference Include="AdonisUI" Version="1.17.1" />
     <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
-    <PackageReference Include="Machina.FFXIV" Version="2.3.3.9" />
     <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="machina\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="machina\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="machina\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="machina\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="machina\Machina.FFXIV\Machina.FFXIV.csproj" />
   </ItemGroup>
 
 </Project>
