@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FFXIVOpcodeWizard.Models;
+using Machina.FFXIV;
 using Machina.Infrastructure;
-using static Machina.TCPNetworkMonitor;
 
 namespace FFXIVOpcodeWizard.PacketDetection
 {
@@ -47,7 +49,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.skipped = false;
 
             this.pq = new Queue<Packet>();
-            var scannerHost = new PacketScanner();
 
             var state = new State
             {
@@ -83,7 +84,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                     };
                 }
 
-                await RunScanner(scanner, parameters, scannerHost);
+                await RunScanner(scanner, parameters);
 
                 scanner.Running = false;
 
@@ -102,8 +103,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
             this.skipped = false;
 
             this.pq = new Queue<Packet>();
-
-            var scannerHost = new PacketScanner();
 
             var state = new State();
 
@@ -130,7 +129,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 };
             }
 
-            await RunScanner(scanner, parameters, scannerHost);
+            await RunScanner(scanner, parameters);
 
             onStateChanged(state);
 
@@ -159,39 +158,37 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
         private FFXIVNetworkMonitor BuildNetworkMonitor(Args args)
         {
-            return new FFXIVNetworkMonitor
+            var window = FindWindow("FFXIVGAME", null);
+            GetWindowThreadProcessId(window, out var pid);
+            var proc = Process.GetProcessById(Convert.ToInt32(pid));
+            var gamePath = proc.MainModule?.FileName;
+            
+            var monitor = new FFXIVNetworkMonitor
             {
                 MessageReceivedEventHandler = OnMessageReceived,
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
-                Region = args.Region,
+                WindowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV",
             };
+            
+            if (!string.IsNullOrEmpty(gamePath))
+            {
+                monitor.OodlePath = gamePath;
+            }
+
+            return monitor;
         }
 
-        private Task RunScanner(Scanner scanner, string[] parameters, PacketScanner scannerHost)
+        private Task RunScanner(Scanner scanner, string[] parameters)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner, parameters, ref this.skipped);
+                    scanner.Opcode = PacketScanner.Scan(this.pq, scanner, parameters, ref this.skipped, ref this.stopped);
                 }
                 catch (FormatException) { }
             });
-        }
-
-        private void RequestParameters(Scanner scanner, string[] parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
-        {
-            for (var paramIndex = 0; paramIndex < parameters.Length; paramIndex++)
-            {
-                var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
-                if (skipRequested)
-                {
-                    skip = true;
-                    break;
-                }
-                parameters[paramIndex] = parameter ?? "";
-            }
         }
 
         private void OnMessageReceived(TCPConnection connection, long epoch, byte[] data)
@@ -217,5 +214,25 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 });
             }
         }
+        
+        private static void RequestParameters(Scanner scanner, IList<string> parameters, Func<Scanner, int, (string parameter, bool skipRequested)> requestParameter, ref bool skip)
+        {
+            for (var paramIndex = 0; paramIndex < parameters.Count; paramIndex++)
+            {
+                var (parameter, skipRequested) = requestParameter(scanner, paramIndex);
+                if (skipRequested)
+                {
+                    skip = true;
+                    break;
+                }
+                parameters[paramIndex] = parameter ?? "";
+            }
+        }
+        
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        
+        [DllImport("user32.dll", SetLastError=true)]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
     }
 }

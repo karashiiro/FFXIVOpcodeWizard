@@ -109,11 +109,14 @@ namespace FFXIVOpcodeWizard
             this.resultsPanelViewModel.UpdateContents();
         }
 
-        private static (string, bool) DetectionProgram_RequestParameter(Scanner scanner, int paramIndex)
+        private (string, bool) DetectionProgram_RequestParameter(Scanner scanner, int paramIndex)
         {
             var auxWindow = new AuxInputPrompt(scanner.ParameterPrompts[paramIndex]);
             auxWindow.ShowDialog();
+            auxWindow.Owner = this;
+            auxWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             auxWindow.Activate();
+            auxWindow.Focus();
             return (auxWindow.ReturnValue, auxWindow.Skipping);
         }
 

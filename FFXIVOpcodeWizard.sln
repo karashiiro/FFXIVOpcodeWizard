@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machina.FFXIV", "machina\Machina.FFXIV\Machina.FFXIV.csproj", "{200D568E-6486-40AF-9A49-8CF9805DAEAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machina", "machina\Machina\Machina.csproj", "{6779434F-6422-46B3-AEC8-8778197DBC32}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{1FA1AC58-B1B7-48F0-9FED-37A46589844E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FA1AC58-B1B7-48F0-9FED-37A46589844E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FA1AC58-B1B7-48F0-9FED-37A46589844E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{200D568E-6486-40AF-9A49-8CF9805DAEAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{200D568E-6486-40AF-9A49-8CF9805DAEAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{200D568E-6486-40AF-9A49-8CF9805DAEAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{200D568E-6486-40AF-9A49-8CF9805DAEAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6779434F-6422-46B3-AEC8-8778197DBC32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6779434F-6422-46B3-AEC8-8778197DBC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6779434F-6422-46B3-AEC8-8778197DBC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6779434F-6422-46B3-AEC8-8778197DBC32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

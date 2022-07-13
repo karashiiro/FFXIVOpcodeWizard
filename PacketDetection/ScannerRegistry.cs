@@ -152,6 +152,11 @@ namespace FFXIVOpcodeWizard.PacketDetection
             RegisterScanner("InitZone", string.Empty, PacketSource.Server,
                 (packet, _) => packet.PacketSize == 128 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 129);
+            uint[] limsaLominsaWeathers = new uint[] { 3, 1, 2, 4, 7 };
+            RegisterScanner("WeatherChange", string.Empty, PacketSource.Server,
+                (packet, _) => packet.PacketSize == 40 &&
+                               inArray(limsaLominsaWeathers, packet.Data[Offsets.IpcData]) &&
+                               BitConverter.ToSingle(packet.Data, Offsets.IpcData + 4) == 20.0);
             //=================
             var actorMoveCenter = new Vector3(-85f, 19f, 0);
             var inRange = (Vector3 diff, Vector3 range) =>
@@ -432,7 +437,16 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                packet.Data[Offsets.IpcData + 3] == 0 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 12) == 0);
             //=================
-            RegisterScanner("Effect", "Switch to White Mage, and cast Dia on an enemy. Then wait for a damage tick.",
+            uint[] basicSynthesis = new uint[] { 100001, 100015, 100030, 100045, 100060, 100075, 100090, 100105 };
+            RegisterScanner("EventPlay32", "Use Trial Synthesis from any recipes, and use Basic Synthesis",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 192 && inArray(basicSynthesis, BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 44)));
+            //=================
+            RegisterScanner("EffectResultBasic", "Switch to White Mage, and auto attack on an enemy.",
+                PacketSource.Server,
+                (packet, _) => packet.PacketSize == 56 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == packet.SourceActor);
+            //=================
+            RegisterScanner("Effect", "Cast Dia on an enemy. Then wait for a damage tick.",
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 156 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) == 16532);
             //=================
