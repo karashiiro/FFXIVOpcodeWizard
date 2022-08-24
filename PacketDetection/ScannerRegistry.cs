@@ -477,7 +477,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("CFNotify", "Please enter the \"Sastasha\" as an undersized party.", // CFNotifyPop
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 4);
+                (packet, _) => packet.PacketSize == 72 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 28) == 4);
             //=================
             RegisterScanner("UpdatePositionInstance", "Please move your character in an/the instance.",
                 PacketSource.Client,
