@@ -477,7 +477,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("CFNotify", "Please enter the \"Sastasha\" as an undersized party.", // CFNotifyPop
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 20) == 4);
+                (packet, _) => packet.PacketSize == 72 && BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 28) == 4);
             //=================
             RegisterScanner("UpdatePositionInstance", "Please move your character in an/the instance.",
                 PacketSource.Client,
@@ -569,6 +569,17 @@ namespace FFXIVOpcodeWizard.PacketDetection
                            row <= 2 &&
                            digit <= 9;
                 });
+            //=================
+            RegisterScanner("SocialList", "Open your Party List.",
+                PacketSource.Server,
+                (packet, parameters) => 
+                {
+                    if (packet.Data.Length != Offsets.IpcData + 896) return false;
+                    if (packet.Data[Offsets.IpcData + 13 - 1] != 1) return false;
+                    if (!IncludesBytes(packet.Data, Encoding.UTF8.GetBytes(parameters[0]))) return false;
+                    return true;
+                },
+                new[] { "Please enter your character name:" });
         }
 
         /// <summary>
