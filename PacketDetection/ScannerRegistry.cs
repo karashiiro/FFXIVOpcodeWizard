@@ -150,7 +150,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == 12);
             RegisterScanner("InitZone", string.Empty, PacketSource.Server,
-                (packet, _) => packet.PacketSize == 128 &&
+                (packet, _) => packet.PacketSize == 136 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 2) == 129);
             uint[] limsaLominsaWeathers = new uint[] { 3, 1, 2, 4, 7 };
             RegisterScanner("WeatherChange", string.Empty, PacketSource.Server,
