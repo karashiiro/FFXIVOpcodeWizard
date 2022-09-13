@@ -553,6 +553,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 (packet, parameters) => packet.PacketSize == 320 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 16) == int.Parse(parameters[0]),
                 new[] { "Please enter the experience from the first sector (first destination in log, not the ones next to report rank and items):" });
             //=================
+            RegisterScanner("IslandWorkshopSupplyDemand", "Go to your Island Sanctuary and check workshop supply/demand status",
+                PacketSource.Server,
+                (packet, parameters) => packet.PacketSize == 96 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == 0 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData +1) == 0);
             RegisterScanner("MiniCactpotInit", "Start playing Mini Cactpot.",
                 PacketSource.Server,
                 (packet, _) =>
