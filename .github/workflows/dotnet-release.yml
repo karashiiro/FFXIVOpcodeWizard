@@ -30,16 +30,16 @@ jobs:
       uses: actions/upload-artifact@v3.1.0
       with:
         name: FFXIVOpcodeWizard.exe
-        path: bin\Release\net6.0\win-x64\publish\FFXIVOpcodeWizard.exe
+        path: bin\Release\net6.0-windows\win-x64\publish\FFXIVOpcodeWizard.exe
     - name: Upload build artifact (pdb)
       uses: actions/upload-artifact@v3.1.0
       with:
         name: FFXIVOpcodeWizard.pdb
-        path: bin\Release\net6.0\win-x64\publish\FFXIVOpcodeWizard.pdb
+        path: bin\Release\net6.0-windows\win-x64\publish\FFXIVOpcodeWizard.pdb
     - name: Upload build artifacts to release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          bin\Release\net6.0\win-x64\publish\FFXIVOpcodeWizard.exe
-          bin\Release\net6.0\win-x64\publish\FFXIVOpcodeWizard.pdb
+          bin\Release\net6.0-windows\win-x64\publish\FFXIVOpcodeWizard.exe
+          bin\Release\net6.0-windows\win-x64\publish\FFXIVOpcodeWizard.pdb
