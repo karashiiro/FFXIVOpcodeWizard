@@ -25,7 +25,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish -c Release -f net6.0-windows --sc false -r win-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true
+      run: dotnet publish -c Release -f net6.0 --sc false -r win-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=true
     - name: Upload build artifact (executable)
       uses: actions/upload-artifact@v3.1.0
       with:
