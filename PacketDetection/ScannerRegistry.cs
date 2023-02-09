@@ -144,7 +144,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 new[] { "Please enter the number of Lightning Crystals you have:" });
             RegisterScanner("CurrencyCrystalInfo", string.Empty,
                 PacketSource.Server,
-                (packet, _) => packet.PacketSize == 64 &&
+                (packet, _) => packet.PacketSize == 56 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 4) == 2001 &&
                                BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) == 10 &&
                                BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 8) == lightningCrystals &&
@@ -282,10 +282,6 @@ namespace FFXIVOpcodeWizard.PacketDetection
                                packet.Data[Offsets.IpcData + 4] == 0x14 &&
                                packet.Data[Offsets.IpcData + 5] == 0x01);
             //=================
-            RegisterScanner("SomeDirectorUnk4", "Please cast your line and catch a fish at Limsa Lominsa.",
-                PacketSource.Server,
-                (packet, _) => packet.PacketSize == 56 &&
-                               BitConverter.ToUInt32(packet.Data, Offsets.IpcData + 0x08) == 257);
             RegisterScanner("EventPlay4", string.Empty,
                 PacketSource.Server,
                 (packet, _) => packet.PacketSize == 80 &&
@@ -555,7 +551,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
             //=================
             RegisterScanner("IslandWorkshopSupplyDemand", "Go to your Island Sanctuary and check workshop supply/demand status",
                 PacketSource.Server,
-                (packet, parameters) => packet.PacketSize == 96 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == 0 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData +1) == 0);
+                (packet, parameters) => packet.PacketSize == 116 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData) == 0 && BitConverter.ToUInt32(packet.Data, Offsets.IpcData +1) == 0);
             RegisterScanner("MiniCactpotInit", "Start playing Mini Cactpot.",
                 PacketSource.Server,
                 (packet, _) =>
