@@ -169,6 +169,9 @@ namespace FFXIVOpcodeWizard.PacketDetection
                 MessageSentEventHandler = OnMessageSent,
                 MonitorType = args.CaptureMode,
                 WindowName = args.Region == Region.China ? "最终幻想XIV" : "FINAL FANTASY XIV",
+                OodleImplementation = args.Region == Region.Korea ? Machina.FFXIV.Oodle.OodleImplementation.KoreanFfxivUdp : Machina.FFXIV.Oodle.OodleImplementation.FfxivTcp,
+                UseDeucalion = args.CaptureMode == NetworkMonitorType.RawSocket,
+                ProcessID = pid,
             };
             
             if (!string.IsNullOrEmpty(gamePath))
