@@ -171,7 +171,7 @@ namespace FFXIVOpcodeWizard.PacketDetection
 
                     var x = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 6) / 65536 * 2000 - 1000;
                     var y = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 8) / 65536 * 2000 - 1000;
-                    var z = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 12) / 65536 * 2000 - 1000;
+                    var z = (float)BitConverter.ToUInt16(packet.Data, Offsets.IpcData + 10) / 65536 * 2000 - 1000;
 
                     return inRange(new Vector3(x, y, z) - actorMoveCenter, new Vector3(15, 2, 15));
                 }
